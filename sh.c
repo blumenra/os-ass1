@@ -49,6 +49,65 @@ struct backcmd {
   struct cmd *cmd;
 };
 
+//OUR IMPL.
+#define MAX_HISTORY 16 
+#define MAX_CMD_SIZE 128
+#define NULL 0
+
+int indexOfNext = 0;
+char historyArr[MAX_HISTORY][MAX_CMD_SIZE];
+
+void history_append(char*);
+void printHistory(void);
+void initCmdArray(char*);
+
+void initCmdArray(char* array){
+
+  int i;
+  int length = strlen(array);
+  for(i=0; i < length; i++){
+
+    array[i] = NULL;
+  }
+}
+
+void history_append(char* cmd){
+
+  if(cmd[0] == '\n')
+    return;
+
+  cmd[strlen(cmd)-1] = 0;  // chop \n
+    
+  strcpy(historyArr[indexOfNext], cmd);
+
+  indexOfNext++;
+  indexOfNext = indexOfNext % MAX_HISTORY;
+
+}
+
+void printHistory(){
+
+  int i;
+  // if there were no 16 cmds yet
+  if(historyArr[indexOfNext][0] == NULL){
+
+    for(i=0; i < indexOfNext; i++){
+      printf(1, "    %d:  %s\n", i+1, historyArr[i]);
+    }
+  }
+   else{
+     int j;
+     i = indexOfNext;
+     for(j=0; j < MAX_HISTORY; j++){
+       printf(1, "    %d:  %s\n", j+1, historyArr[i]);
+       i++;
+       i = i % MAX_HISTORY;
+     } 
+   }
+}
+
+
+
 int fork1(void);  // Fork but panics on failure.
 void panic(char*);
 struct cmd *parsecmd(char*);
@@ -155,8 +214,17 @@ main(void)
     }
   }
 
+  // creates 16 new buffers for the history commands
+  int i;
+  for(i=0; i < MAX_HISTORY; i++){
+    initCmdArray(historyArr[i]); // initializes tmp with NULL
+  }
+
   // Read and run input commands.
   while(getcmd(buf, sizeof(buf)) >= 0){
+    
+    history_append(buf); // chops '\n' of buf in side
+
     if(buf[0] == 'c' && buf[1] == 'd' && buf[2] == ' '){
       // Chdir must be called by the parent, not the child.
       buf[strlen(buf)-1] = 0;  // chop \n
@@ -164,6 +232,20 @@ main(void)
         printf(2, "cannot cd %s\n", buf+3);
       continue;
     }
+
+    if(strcmp(buf, "history") == 0){
+      printHistory();
+      continue;
+    }
+    else if(strncmp(buf, "history -l", 10) == 0){ // history -l ##
+
+
+      // impl here the "history -l ##" case
+
+      continue; 
+    }
+
+
     if(fork1() == 0)
       runcmd(parsecmd(buf));
     wait();
