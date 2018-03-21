@@ -28,9 +28,11 @@ int yield(void);
 // ulib.c
 int stat(char*, struct stat*);
 char* strcpy(char*, char*);
+char* strncpy(char*, char*, int); // our func
 void *memmove(void*, void*, int);
 char* strchr(const char*, char c);
 int strcmp(const char*, const char*);
+int strncmp(const char*, const char*, int); // our func
 void printf(int, char*, ...);
 char* gets(char*, int max);
 uint strlen(char*);
