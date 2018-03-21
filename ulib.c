@@ -15,6 +15,17 @@ strcpy(char *s, char *t)
   return os;
 }
 
+char*
+strncpy(char *s, char *t, int n)
+{
+  char *os;
+  
+  os = s;
+  while(((*s++ = *t++) != 0) && (n--))
+    ;
+  return os;
+}
+
 int
 strcmp(const char *p, const char *q)
 {
@@ -22,6 +33,18 @@ strcmp(const char *p, const char *q)
     p++, q++;
   return (uchar)*p - (uchar)*q;
 }
+
+// OUR FUNC
+int
+strncmp(const char *p, const char *q, int n)
+{
+  int i = 1;
+
+  while((*p && *p == *q) && (i < n))
+    p++, q++, i++;
+  return (uchar)*p - (uchar)*q;
+}
+
 
 uint
 strlen(char *s)
