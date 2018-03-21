@@ -60,6 +60,7 @@ char historyArr[MAX_HISTORY][MAX_CMD_SIZE];
 void history_append(char*);
 void printHistory(void);
 void initCmdArray(char*);
+char* getHistoryCMD(int, char*);
 
 void initCmdArray(char* array){
 
@@ -106,7 +107,11 @@ void printHistory(){
    }
 }
 
+char* getHistoryCMD(int index, char* buf){
 
+  strcpy(buf, historyArr[index-1]);
+  return buf;
+}
 
 int fork1(void);  // Fork but panics on failure.
 void panic(char*);
@@ -239,8 +244,25 @@ main(void)
     }
     else if(strncmp(buf, "history -l", 10) == 0){ // history -l ##
 
+      char cmd[MAX_CMD_SIZE-10];
+      int index = atoi(buf+10) + 1;
 
-      // impl here the "history -l ##" case
+      printf(1, "extracted cmd: %s", cmd);
+      
+      if(index > 16){
+	printf(2, "index %d is invalid! Choose between 1-16\n", index);
+        continue;
+      }
+
+      printf(1, "Extracting cmd in index %d...\n", index);
+
+      getHistoryCMD(index, cmd); //get the index-th cmd in history
+      
+      printf(1, "Extracted cmd: %s\n", cmd);
+      
+      if(fork1() == 0)
+        runcmd(parsecmd(cmd));
+      wait();
 
       continue; 
     }
