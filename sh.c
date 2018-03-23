@@ -245,20 +245,20 @@ main(void)
     else if(strncmp(buf, "history -l", 10) == 0){ // history -l ##
 
       char cmd[MAX_CMD_SIZE-10];
-      int index = atoi(buf+10) + 1;
+      int index = atoi(buf+11);
 
-      printf(1, "extracted cmd: %s", cmd);
-      
       if(index > 16){
 	printf(2, "index %d is invalid! Choose between 1-16\n", index);
         continue;
       }
-
-      printf(1, "Extracting cmd in index %d...\n", index);
-
+      
       getHistoryCMD(index, cmd); //get the index-th cmd in history
       
-      printf(1, "Extracted cmd: %s\n", cmd);
+      // IF the chosen cmd from hiatory is "history"..
+      if(strcmp(cmd, "history") == 0){
+        printHistory();
+	continue;
+      }
       
       if(fork1() == 0)
         runcmd(parsecmd(cmd));
