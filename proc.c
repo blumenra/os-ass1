@@ -546,3 +546,9 @@ getVariable(char* variable, char* value){
 
   return 7;
 }
+
+int
+remVariable(char* variable){
+
+  return 8;
+}

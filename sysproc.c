@@ -116,3 +116,10 @@ sys_getVariable(void){
   return getVariable(variable, value);
 }
 
+int
+sys_remVariable(void){
+  
+  char* variable = "";
+
+  return remVariable(variable);
+}

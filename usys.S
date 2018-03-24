@@ -33,4 +33,5 @@ SYSCALL(uptime)
 // our impls
 SYSCALL(setVariable)
 SYSCALL(getVariable)
+SYSCALL(remVariable)
 
