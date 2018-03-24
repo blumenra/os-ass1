@@ -123,6 +123,7 @@ void            yield(void);
 
 //our impl
 int             setVariable(char*, char*);
+int             getVariable(char*, char*);
 
 // swtch.S
 void            swtch(struct context**, struct context*);

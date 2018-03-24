@@ -24,4 +24,5 @@
 
 // our impl
 #define SYS_setVariable  23
+#define SYS_getVariable  24
 

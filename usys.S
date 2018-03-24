@@ -30,6 +30,7 @@ SYSCALL(sbrk)
 SYSCALL(sleep)
 SYSCALL(uptime)
 
-// our impl
+// our impls
 SYSCALL(setVariable)
+SYSCALL(getVariable)
 

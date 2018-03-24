@@ -97,6 +97,7 @@ sys_uptime(void)
   return xticks;
 }
 
+//our impls
 int
 sys_setVariable(void){
   
@@ -105,3 +106,13 @@ sys_setVariable(void){
 
   return setVariable(variable, value);
 }
+
+int
+sys_getVariable(void){
+  
+  char* variable = "";
+  char* value = "";
+
+  return getVariable(variable, value);
+}
+

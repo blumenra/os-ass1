@@ -533,9 +533,16 @@ procdump(void)
   }
 }
 
+//out impls
 int
 setVariable(char* variable, char* value){
 
   return 6;
 
+}
+
+int
+getVariable(char* variable, char* value){
+
+  return 7;
 }

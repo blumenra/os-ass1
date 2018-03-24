@@ -27,6 +27,7 @@ int yield(void);
 
 // our impl
 int setVariable(char*, char*);
+int getVariable(char*, char*);
 
 // ulib.c
 int stat(char*, struct stat*);
