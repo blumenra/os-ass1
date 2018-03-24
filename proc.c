@@ -532,3 +532,10 @@ procdump(void)
     cprintf("\n");
   }
 }
+
+int
+setVariable(char* variable, char* value){
+
+  return 6;
+
+}

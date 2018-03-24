@@ -25,6 +25,9 @@ int sleep(int);
 int uptime(void);
 int yield(void);
 
+// our impl
+int setVariable(char*, char*);
+
 // ulib.c
 int stat(char*, struct stat*);
 char* strcpy(char*, char*);

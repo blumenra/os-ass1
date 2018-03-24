@@ -21,3 +21,7 @@
 #define SYS_mkdir  20
 #define SYS_close  21
 #define SYS_yield  22
+
+// our impl
+#define SYS_setVariable  23
+
