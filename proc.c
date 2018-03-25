@@ -25,6 +25,8 @@ typedef struct {
 assignment* var_table[MAX_VARIABLES];
 int var_table_size = 0;
 
+// extern char* strcpy(char*, char*);
+// extern int strcmp(const char*, const char*);
 int addVar(char*, char*);
 int removeVar(char* variable);
 int isVarTableFull(void);
@@ -33,8 +35,15 @@ int checkInputCorrectness(char*, char*);
 int isAlphaBetStr(char*);
 int isAlphaBetChar(char);
 char* resetBuf(char*);
+void clearAssignment(int);
 
 // Append a new allocated assignLink to var_table
+void clearAssignment(int index){
+
+  resetBuf(var_table[index]->var);
+  resetBuf(var_table[index]->value);
+}
+
 char* resetBuf(char* buf){
 
 	int i;
@@ -42,6 +51,8 @@ char* resetBuf(char* buf){
 		
 		buf[i] = 0;
 	}
+
+  return buf;
 }
 
 int isAlphaBetChar(char c){
@@ -105,7 +116,8 @@ int addVar(char* variable, char* value){
 		if(var_table[i] == NULL){
 
       clearAssignment(i);
-			var_table[i] = ;
+			strncpy(var_table[i]->var, variable, strlen(variable));
+      strncpy(var_table[i]->value, value, strlen(value));
 			var_table_size++; // add size of var_table by 1
 			return 0;
 		}
@@ -113,6 +125,7 @@ int addVar(char* variable, char* value){
 		i++;
 	}
 
+  return 0;
 }
 
 int removeVar(char* variable){
@@ -123,7 +136,7 @@ int removeVar(char* variable){
 	int i=0;
 	while(i < MAX_VARIABLES){
 
-		if(strcmp(var_table[i]->var, variable) = 0){
+		if(strncmp(var_table[i]->var, variable, strlen(variable)) == 0){
 
 			var_table[i] = NULL;
 			return 0;
@@ -675,10 +688,10 @@ setVariable(char* variable, char* value){
 	int i=0;
 	while(i < MAX_VARIABLES){
 
-		if(strcmp(var_table[i]->var, variable) = 0){
+		if(strncmp(var_table[i]->var, variable, strlen(variable)) == 0){
 
 			resetBuf(var_table[i]->value);
-			strcpy(var_table[i]->value, value);
+			strncpy(var_table[i]->value, value, strlen(value));
 			return 0;
 		}
 
@@ -686,19 +699,19 @@ setVariable(char* variable, char* value){
 	}
 
 	// if variable wasn't in the table yet, add it
-	addVar(variable, value);
+	return addVar(variable, value);
 
 }
 
 int
 getVariable(char* variable, char* value){
 
-	i++;
+	int i=0;
 	while(i < MAX_VARIABLES){
 
-		if(strcmp(var_table[i]->var, variable) = 0){
+		if(strncmp(var_table[i]->var, variable, strlen(variable)) == 0){
 
-			strcpy(value, var_table[i]->var);
+			strncpy(value, var_table[i]->var, strlen(var_table[i]->var));
 			return 0;
 		}
 
@@ -712,7 +725,7 @@ getVariable(char* variable, char* value){
 int
 remVariable(char* variable){
 
-	int res = remVar(variable);
+	int res = removeVar(variable);
 
 	if(res)
 		return 0;
