@@ -6,16 +6,15 @@
 #include "x86.h"
 #include "proc.h"
 #include "spinlock.h"
-#include "user.h"
+//#include "user.h"
 
 //OUR IMPL
+#define MAX_VARIABLES 32
+#define MAX_VAR 32
+#define MAX_VALUE 128
+#define NULL 0
 
-#define MAX_VARIABLES 32;
-#define MAX_VAR 32;
-#define MAX_VALUE 128;
-#define NULL 0;
-
-struct assignment{
+typedef struct {
 
 	char var[MAX_VAR];
 	char value[MAX_VALUE];
@@ -23,7 +22,7 @@ struct assignment{
 } assignment;
 
 // var table functions
-assignment var_table[MAX_VARIABLES];
+assignment* var_table[MAX_VARIABLES];
 int var_table_size = 0;
 
 int addVar(char*, char*);
@@ -98,14 +97,15 @@ int isVarTableEmpty(){
 int addVar(char* variable, char* value){
 
 	if(isVarTableFull())
-		return -1
+		return -1;
 
 	int i=0;
 	while(i < MAX_VARIABLES){
 
 		if(var_table[i] == NULL){
 
-			var_table[i] = createAssginment(variable, value);
+      clearAssignment(i);
+			var_table[i] = ;
 			var_table_size++; // add size of var_table by 1
 			return 0;
 		}
@@ -136,20 +136,6 @@ int removeVar(char* variable){
 	return 0;
 }
 
-
-// assign_link
-assignment* createAssginment(char* variable, char* value)
-
-assignment* createAssginment(char* variable, char* value){
-
-	assignment* newAss = (assignment*) (malloc(sizeof(assignment)));
-	newAss->var = (char*) (malloc(sizeof(char)*strlen(variable)));
-	newAss->value = (char*) (malloc(sizeof(char)*strlen(value)));
-	strcpy(newAss->var, variable);
-	strcpy(newAss->value, value);
-
-	return newAss;
-}
 
 struct {
   struct spinlock lock;
