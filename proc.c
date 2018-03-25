@@ -6,6 +6,150 @@
 #include "x86.h"
 #include "proc.h"
 #include "spinlock.h"
+#include "user.h"
+
+//OUR IMPL
+
+#define MAX_VARIABLES 32;
+#define MAX_VAR 32;
+#define MAX_VALUE 128;
+#define NULL 0;
+
+struct assignment{
+
+	char var[MAX_VAR];
+	char value[MAX_VALUE];
+
+} assignment;
+
+// var table functions
+assignment var_table[MAX_VARIABLES];
+int var_table_size = 0;
+
+int addVar(char*, char*);
+int removeVar(char* variable);
+int isVarTableFull(void);
+int isVarTableEmpty(void);
+int checkInputCorrectness(char*, char*);
+int isAlphaBetStr(char*);
+int isAlphaBetChar(char);
+char* resetBuf(char*);
+
+// Append a new allocated assignLink to var_table
+char* resetBuf(char* buf){
+
+	int i;
+	for (i=0; i < strlen(buf); i++){
+		
+		buf[i] = 0;
+	}
+}
+
+int isAlphaBetChar(char c){
+
+	if((c < 65) || (c > 90 && c < 97) || (c > 122)){
+
+		return NULL;
+	}
+	else
+		return 1;
+}
+
+int isAlphaBetStr(char* str){
+
+	int i;
+	for(i=0; i < strlen(str); i++){
+		if(!isAlphaBetChar(str[i]))
+			return NULL;
+	}
+
+	return 1;
+}
+
+int checkInputCorrectness(char* variable, char* value){
+
+	if(
+		!isAlphaBetStr(variable) ||
+		(strlen(variable) > MAX_VAR) || 
+		(strlen(value) > MAX_VALUE)){
+
+		return NULL;
+	}
+
+	return 1;
+}
+
+int isVarTableFull(){
+	
+	if(var_table_size == MAX_VARIABLES)
+		return 1;
+	else
+		return 0;
+}
+
+int isVarTableEmpty(){
+
+	if(var_table_size == 0)
+		return 1;
+	else
+		return 0;
+}
+
+int addVar(char* variable, char* value){
+
+	if(isVarTableFull())
+		return -1
+
+	int i=0;
+	while(i < MAX_VARIABLES){
+
+		if(var_table[i] == NULL){
+
+			var_table[i] = createAssginment(variable, value);
+			var_table_size++; // add size of var_table by 1
+			return 0;
+		}
+
+		i++;
+	}
+
+}
+
+int removeVar(char* variable){
+
+	if(isVarTableEmpty())
+		return 0;
+
+	int i=0;
+	while(i < MAX_VARIABLES){
+
+		if(strcmp(var_table[i]->var, variable) = 0){
+
+			var_table[i] = NULL;
+			return 0;
+		}
+
+		i++;
+	}
+
+	// No variable with the given name
+	return 0;
+}
+
+
+// assign_link
+assignment* createAssginment(char* variable, char* value)
+
+assignment* createAssginment(char* variable, char* value){
+
+	assignment* newAss = (assignment*) (malloc(sizeof(assignment)));
+	newAss->var = (char*) (malloc(sizeof(char)*strlen(variable)));
+	newAss->value = (char*) (malloc(sizeof(char)*strlen(value)));
+	strcpy(newAss->var, variable);
+	strcpy(newAss->value, value);
+
+	return newAss;
+}
 
 struct {
   struct spinlock lock;
@@ -537,18 +681,55 @@ procdump(void)
 int
 setVariable(char* variable, char* value){
 
-  return 6;
+	if(!checkInputCorrectness(variable, value)){
+		return -2;
+	}
+
+	// Look for variable in var_table and update if found
+	int i=0;
+	while(i < MAX_VARIABLES){
+
+		if(strcmp(var_table[i]->var, variable) = 0){
+
+			resetBuf(var_table[i]->value);
+			strcpy(var_table[i]->value, value);
+			return 0;
+		}
+
+		i++;
+	}
+
+	// if variable wasn't in the table yet, add it
+	addVar(variable, value);
 
 }
 
 int
 getVariable(char* variable, char* value){
 
-  return 7;
+	i++;
+	while(i < MAX_VARIABLES){
+
+		if(strcmp(var_table[i]->var, variable) = 0){
+
+			strcpy(value, var_table[i]->var);
+			return 0;
+		}
+
+		i++;
+	}
+
+	// No variable with the given name
+	return -1;
 }
 
 int
 remVariable(char* variable){
 
-  return 8;
+	int res = remVar(variable);
+
+	if(res)
+		return 0;
+	else
+		return -1; 	
 }
