@@ -62,6 +62,63 @@ void printHistory(void);
 void initCmdArray(char*);
 char* getHistoryCMD(int, char*);
 
+void getFirstDollarVar(char*, int*, int*);
+void append_str(char*, char*);
+int getIndexOfChar(char, char*);
+void resetStr(char*);
+
+void resetStr(char* buf){
+
+  int i;
+  for(i=0; i < strlen(buf); i++){
+    
+    buf[i] = 0;
+  }
+}
+
+int getIndexOfChar(char c, char* str){
+
+  int i;
+  for(i=0; i < strlen(str); i++){
+
+    if(c == str[i])
+      return i;
+  }
+
+  return -1;
+}
+
+void append_str(char* buf, char* str){
+
+  strncpy(buf+strlen(buf), str, strlen(str));
+}
+
+void getFirstDollarVar(char* buf, int* index, int* len){
+
+  *index = getIndexOfChar('$', buf);
+  if(*index < 0){
+    *len = -1;
+    return;
+  }
+
+  int end1 = getIndexOfChar('$', buf+*index+1);
+  int end2 = getIndexOfChar(' ', buf+*index+1);
+  if(end1 <= 0){
+    if(end2 <= 0)
+      *len = strlen(buf+*index); // len is the last $var len including the '$'
+    else
+      *len = end2-*index+1; // include ' '
+  }
+  else
+    if(end2 <= 0)
+      *len = end1-*index;
+    else
+      if(end1 < end2)
+        *len = end1-*index;
+      else
+        *len = end2-*index;
+}
+
 void initCmdArray(char* array){
 
   int i;
@@ -228,6 +285,7 @@ main(void)
   // Read and run input commands.
   while(getcmd(buf, sizeof(buf)) >= 0){
     
+    //Add command to history array
     history_append(buf); // chops '\n' of buf in side
 
     if(buf[0] == 'c' && buf[1] == 'd' && buf[2] == ' '){
@@ -238,6 +296,7 @@ main(void)
       continue;
     }
 
+    //HISTORY
     if(strcmp(buf, "history") == 0){
       printHistory();
       continue;
@@ -248,7 +307,7 @@ main(void)
       int index = atoi(buf+11);
 
       if(index > 16){
-	printf(2, "index %d is invalid! Choose between 1-16\n", index);
+	      printf(2, "index %d is invalid! Choose between 1-16\n", index);
         continue;
       }
       
@@ -257,7 +316,7 @@ main(void)
       // IF the chosen cmd from hiatory is "history"..
       if(strcmp(cmd, "history") == 0){
         printHistory();
-	continue;
+	      continue;
       }
       
       if(fork1() == 0)
@@ -266,6 +325,65 @@ main(void)
 
       continue; 
     }
+
+    // ASSIGNMENTS
+    //getVarilable
+    char cmd[strlen(buf)];
+    strcpy(cmd, buf);
+    int index = 0;
+    int len = 0;
+    char newCmd[MAX_CMD_SIZE];
+
+    while(index < 0){
+
+      getFirstDollarVar(cmd+index+len, &index, &len);
+
+      if(index >= 0){
+
+
+        char var[len];
+        char* value;
+        strncpy(var, buf+index, len);
+        
+        if(var[strlen(var)-1] == ' '){
+
+          append_str(newCmd, " ");
+          var[strlen(var)-1] = 0;
+        }
+        
+        int ret = getVariable(var, value);
+
+        printf(1, "ret: %d\n", ret);
+        printf(1, "value: %s\n", value);
+
+        append_str(newCmd, value);
+      }
+    }
+
+    // setVariable
+
+    printf(1, "newCmd before set: %s\n", newCmd);
+    index = getIndexOfChar('=', newCmd);
+    printf(1, "index before set: %d\n", index);
+    if(index > 0){
+      char var[index];
+      char value[strlen(newCmd)-index];
+      strncpy(var, newCmd, index);
+      strcpy(value, newCmd+index+1);
+      int ret = setVariable(var, value);
+
+      printf(1, "setVariable:\n");
+      printf(1, "  ret: %d\n", ret);
+      printf(1, "  var: %s\n", var);
+      printf(1, "  value: %s\n", value);
+    }
+
+    resetStr(buf);
+    strcpy(buf, newCmd);
+
+
+
+
 
 
     if(fork1() == 0)
