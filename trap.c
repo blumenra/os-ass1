@@ -53,10 +53,13 @@ trap(struct trapframe *tf)
       ticks++;
 
       //TASK 2
-      if(myproc()->state == RUNNING)
-        myproc()->rtime++;
-      if(myproc()->state == SLEEPING)
-        myproc()->iotime++;
+      if(myproc() != 0){
+
+        if(myproc()->state == RUNNING)
+          myproc()->rtime++;
+        if(myproc()->state == SLEEPING)
+          myproc()->iotime++;
+      }
 
       wakeup(&ticks);
       release(&tickslock);
