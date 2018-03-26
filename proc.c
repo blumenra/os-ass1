@@ -66,7 +66,7 @@ double calcProcRatio(struct proc*);
 
 double calcProcRatio(struct proc* p){
 
-  double decFactor;
+  double decFactor = 0;
   int wtime;
   double ans;
 
@@ -503,7 +503,7 @@ exit(void)
   wakeup1(curproc->parent);
 
   //our addition: updating the end time of the process
-  p->etime = ticks;
+  curproc->etime = ticks;
 
   // Pass abandoned children to init.
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
@@ -570,7 +570,7 @@ int
 wait2(int pid, int* wtime, int* rtime, int* iotime)
 {
   struct proc *p;
-  int havekids, pid;
+  int havekids;
   struct proc *curproc = myproc();
  
   acquire(&ptable.lock);
@@ -623,7 +623,6 @@ wait2(int pid, int* wtime, int* rtime, int* iotime)
 void
 scheduler(void)
 {
-  struct proc *p;
   struct cpu *c = mycpu();
   c->proc = 0;
   
@@ -636,7 +635,8 @@ scheduler(void)
     acquire(&ptable.lock);
 
     #ifdef DEFAULT
-
+    
+    struct proc *p;
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
       if(p->state != RUNNABLE)
         continue;
@@ -660,7 +660,8 @@ scheduler(void)
     #else
 
     #ifdef FCFS
-
+    
+    struct proc *p;
     struct proc *minProc = NULL;
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
       if(p->state == RUNNABLE){
@@ -704,6 +705,7 @@ scheduler(void)
 
     #ifdef SRT
 
+    struct proc *p;
     struct proc *srtProc = NULL;
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
       if(p->state == RUNNABLE){
@@ -749,6 +751,7 @@ scheduler(void)
 
     #ifdef CFSD
 
+    struct proc *p;
     struct proc *cfsdProc = NULL;
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
       if(p->state == RUNNABLE){

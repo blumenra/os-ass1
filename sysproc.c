@@ -100,7 +100,25 @@ sys_uptime(void)
 int
 sys_wait2(void)
 {
-  return wait2(); //arguments?
+  //wait2(int pid, int* wtime, int* rtime, int* iotime);
+  int pid;
+  int* wtime;
+  int* rtime;
+  int* iotime;
+
+  if(argint(0, &pid) < 0)
+    return -1;
+
+  if (argptr(0, (void*)&wtime, sizeof(wtime)) < 0)
+    return -1;
+
+  if (argptr(0, (void*)&rtime, sizeof(rtime)) < 0)
+    return -1;
+  
+  if (argptr(0, (void*)&iotime, sizeof(iotime)) < 0)
+    return -1;
+
+  return wait2(pid, wtime, rtime, iotime);
 }
 
 
