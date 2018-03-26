@@ -78,9 +78,12 @@ void resetStr(char* buf){
 
 int getIndexOfChar(char c, char* str){
 
+  printf(1, "strlen: %d\n", strlen(str));  
   int i;
   for(i=0; i < strlen(str); i++){
 
+    printf(1, "c: %c\n", c);
+    printf(1, "str[%d]: %c\n", i, str[i]);
     if(c == str[i])
       return i;
   }
@@ -334,15 +337,20 @@ main(void)
     int len = 0;
     char newCmd[MAX_CMD_SIZE];
 
-    while(index < 0){
+    printf(1, "cmd before get: %s\n", cmd);
+
+    while(index >= 0){
 
       getFirstDollarVar(cmd+index+len, &index, &len);
+
+      printf(1, "index after get: %d\n", index);
+      printf(1, "len after get: %d\n", len);
 
       if(index >= 0){
 
 
         char var[len];
-        char* value;
+        char value[MAX_CMD_SIZE];
         strncpy(var, buf+index, len);
         
         if(var[strlen(var)-1] == ' '){
@@ -350,14 +358,21 @@ main(void)
           append_str(newCmd, " ");
           var[strlen(var)-1] = 0;
         }
+
+        printf(1, "var+1: %s\n", var+1);
         
-        int ret = getVariable(var, value);
+        int ret = getVariable(var+1, value);
 
         printf(1, "ret: %d\n", ret);
         printf(1, "value: %s\n", value);
 
         append_str(newCmd, value);
       }
+      else{
+        append_str(newCmd, cmd); 
+      }
+
+      printf(1, "newCmd after get: %s\n", newCmd);
     }
 
     // setVariable
@@ -369,6 +384,7 @@ main(void)
       char var[index];
       char value[strlen(newCmd)-index];
       strncpy(var, newCmd, index);
+      var[index] = 0;
       strcpy(value, newCmd+index+1);
       int ret = setVariable(var, value);
 
@@ -376,11 +392,17 @@ main(void)
       printf(1, "  ret: %d\n", ret);
       printf(1, "  var: %s\n", var);
       printf(1, "  value: %s\n", value);
+
+
+      resetStr(buf);
+      strcpy(buf, newCmd);
+      resetStr(newCmd);
+      continue;
     }
 
     resetStr(buf);
     strcpy(buf, newCmd);
-
+    resetStr(newCmd);
 
 
 

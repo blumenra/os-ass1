@@ -706,6 +706,9 @@ setVariable(char* variable, char* value){
 int
 getVariable(char* variable, char* value){
 
+  cprintf("Inside getVariable. variable: ", variable);
+  cprintf(variable);
+  
 	int i=0;
 	while(i < MAX_VARIABLES){
 
