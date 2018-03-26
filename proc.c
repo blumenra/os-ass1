@@ -62,7 +62,22 @@ void printAssignment(assignment* ass){
 
 int updateApproxTime(struct proc*);
 //TASK 3.4
+void printProcData(struct proc*);
+
 double calcProcRatio(struct proc*);
+
+void printProcData(struct proc* p){
+
+  cprintf("proc name: %s\n", p->name);
+  cprintf("   pid: %d\n", p->pid);
+  cprintf("   ctime: %d\n", p->ctime);
+  cprintf("   etime: %d\n", p->etime);
+  cprintf("   iotime: %d\n", p->iotime);
+  cprintf("   rtime: %d\n", p->rtime);
+  cprintf("   rContTime: %d\n", p->rContTime);
+  cprintf("   remApproxTime: %d\n", p->remApproxTime);
+  cprintf("   priority: %d\n", p->priority);
+}
 
 double calcProcRatio(struct proc* p){
 
@@ -641,11 +656,15 @@ scheduler(void)
       if(p->state != RUNNABLE)
         continue;
 
+      // printProcData(p); //REMOVE ME
+
       // Switch to chosen process.  It is the process's job
       // to release ptable.lock and then reacquire it
       // before jumping back to us.
       c->proc = p;
       switchuvm(p);
+
+
       p->state = RUNNING;
 
       swtch(&(c->scheduler), p->context);
@@ -664,12 +683,19 @@ scheduler(void)
     struct proc *p;
     struct proc *minProc = NULL;
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+      cprintf("ptable size: %d\n", ptable)
       if(p->state == RUNNABLE){
         if(minProc != NULL){
+
+          cprintf(">>>>>>>>>>>>>>>>");
+          printProcData(p); //REMOVE ME
+          printProcData(minProc); //REMOVE ME
+          cprintf("<<<<<<<<<<<<<<<<");
+
           if(p->ctime < minProc->ctime){
 
             minProc = p;
-            continue;
+            //continue;
           }
         }
         else{
@@ -677,8 +703,10 @@ scheduler(void)
         }
       }
 
+
       if(minProc != NULL){
 
+        printProcData(minProc); //REMOVE ME
         p = minProc;
 
         // Switch to chosen process.  It is the process's job
