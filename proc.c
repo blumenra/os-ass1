@@ -60,6 +60,52 @@ void printAssignment(assignment* ass){
   cprintf("\n");
 }
 
+int updateApproxTime(struct proc*);
+//TASK 3.4
+int calcProcRatio(struct proc*);
+
+double calcProcRatio(struct proc* p){
+
+  double decFactor;
+  int wtime;
+  double ans;
+
+  switch(p->priority) {
+    case 1 :
+       decFactor = 0.75;
+       break;
+    case 2 :
+       decFactor = 1;
+       break;
+    case 3 :
+       decFactor = 1.25;
+       break;
+    default :
+       printf(2, "Invalid priority!\n");
+  }
+
+
+  wtime = p->ctime - p->iotime - p->rtime;
+
+  ans = (p->rtime * decFactor)/(p->rtime + wtime);
+
+  return ans;
+}
+
+int updateApproxTime(struct proc *p){
+
+  if(p->rtime >= p->remApproxTime){
+
+    p->remApproxTime = p->remApproxTime + ALPHA*p->remApproxTime;    
+
+    return 1;
+  }
+  else{
+    return 0;
+  }
+
+}
+
 void clearAssignment(int index){
 
   resetVar(var_table[index]->var);
@@ -152,8 +198,6 @@ int addVar(char* variable, char* value){
 
 		if(var_table[i] == NULL){
 
-
-
       cprintf("variable: ");
       cprintf(variable);
       cprintf("\n");
@@ -163,6 +207,7 @@ int addVar(char* variable, char* value){
       cprintf("\n");
 
 			setAssignment(i, variable, value);
+
 			var_table_size++; // add size of var_table by 1
       
       printAssignment(var_table[i]); //REMOVE ME
@@ -280,6 +325,11 @@ found:
   p->state = EMBRYO;
   p->pid = nextpid++;
 
+  p-> rContTime = 0;
+  p->remApproxTime = QUANTUM;
+  p->priority = 2;
+
+
   release(&ptable.lock);
 
   // Allocate kernel stack.
@@ -375,6 +425,8 @@ fork(void)
   struct proc *np;
   struct proc *curproc = myproc();
 
+  curproc->remApproxTime = QUANTUM; // our addition. Not sure if it suppose to be here..
+
   // Allocate process.
   if((np = allocproc()) == 0){
     return -1;
@@ -391,6 +443,8 @@ fork(void)
   np->parent = curproc;
   *np->tf = *curproc->tf;
 
+  np->priority = curproc->priority; // our addition. Not sure if it suppose to be here..
+
   // Clear %eax so that fork returns 0 in the child.
   np->tf->eax = 0;
 
@@ -405,7 +459,7 @@ fork(void)
 
   acquire(&ptable.lock);
 
-  np->state = RUNNABLE;
+  np->state = RUNNABLE;  
 
   release(&ptable.lock);
 
@@ -517,12 +571,16 @@ scheduler(void)
   struct cpu *c = mycpu();
   c->proc = 0;
   
+
   for(;;){
     // Enable interrupts on this processor.
     sti();
 
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
+
+    #ifdef DEFAULT
+
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
       if(p->state != RUNNABLE)
         continue;
@@ -540,7 +598,144 @@ scheduler(void)
       // Process is done running for now.
       // It should have changed its p->state before coming back.
       c->proc = 0;
+      p->rContTime = 0;
     }
+    
+    #else
+
+    #ifdef FCFS
+
+    struct proc *minProc = NULL;
+    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+      if(p->state == RUNNABLE){
+        if(minProc != NULL){
+          if(p->ctime < minProc->ctime){
+
+            minProc = p;
+            continue;
+          }
+        }
+        else{
+          minProc = p;
+        }
+      }
+
+      if(minProc != NULL){
+
+        p = minProc;
+
+        // Switch to chosen process.  It is the process's job
+        // to release ptable.lock and then reacquire it
+        // before jumping back to us.
+        c->proc = p;
+        switchuvm(p);
+        p->state = RUNNING;
+
+        swtch(&(c->scheduler), p->context);
+        switchkvm();
+
+        // Process is done running for now.
+        // It should have changed its p->state before coming back.
+        c->proc = 0;
+        p->rContTime = 0;
+        
+      }
+    }
+    
+    #else
+    
+
+
+    #ifdef SRT
+
+    struct proc *srtProc = NULL;
+    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+      if(p->state == RUNNABLE){
+        if(srtProc != NULL){
+          if(p->remApproxTime < srtProc->remApproxTime){
+
+            srtProc = p;
+            continue;
+          }
+        }
+        else{
+          srtProc = p;
+        }
+      }
+
+      if(srtProc != NULL){
+        
+        p = srtProc;
+        
+
+        
+        // Switch to chosen process.  It is the process's job
+        // to release ptable.lock and then reacquire it
+        // before jumping back to us.
+        c->proc = p;
+        switchuvm(p);
+        p->state = RUNNING;
+
+        swtch(&(c->scheduler), p->context);
+        switchkvm();
+
+        updateApproxTime(p); // our addition
+
+        // Process is done running for now.
+        // It should have changed its p->state before coming back.
+        c->proc = 0;
+        p->rContTime = 0;
+      }
+    }
+
+    #else
+
+
+    #ifdef CFSD
+
+    struct proc *cfsdProc = NULL;
+    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+      if(p->state == RUNNABLE){
+        if(cfsdProc != NULL){
+          if(calcProcRatio(p) < calcProcRatio(cfsdProc)){
+
+            cfsdProc = p;
+            continue;
+          }
+        }
+        else{
+          cfsdProc = p;
+        }
+      }
+
+      if(cfsdProc != NULL){
+        
+        p = cfsdProc;
+        
+
+        
+        // Switch to chosen process.  It is the process's job
+        // to release ptable.lock and then reacquire it
+        // before jumping back to us.
+        c->proc = p;
+        switchuvm(p);
+        p->state = RUNNING;
+
+        swtch(&(c->scheduler), p->context);
+        switchkvm();
+
+        // Process is done running for now.
+        // It should have changed its p->state before coming back.
+        c->proc = 0;
+        p->rContTime = 0;
+      }
+    }
+
+    #endif
+    #endif
+    #endif
+    #endif
+
     release(&ptable.lock);
 
   }
@@ -724,7 +919,7 @@ procdump(void)
   }
 }
 
-//out impls
+//our impls
 int
 setVariable(char* variable, char* value){
 
@@ -793,4 +988,12 @@ remVariable(char* variable){
 		return 0;
 	else
 		return -1; 	
+}
+
+// The input correctness is checked in sys_set_priority(void) which is in sysproc.c
+int set_priority(int priority){
+
+  p->priority = priority;
+  
+  return 0;
 }

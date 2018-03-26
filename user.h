@@ -29,6 +29,7 @@ int yield(void);
 int setVariable(char*, char*);
 int getVariable(char*, char*);
 int remVariable(char*);
+int set_priority(int);
 
 // ulib.c
 int stat(char*, struct stat*);

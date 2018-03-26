@@ -120,11 +120,11 @@ void            userinit(void);
 int             wait(void);
 void            wakeup(void*);
 void            yield(void);
-
 //our impl
 int             setVariable(char*, char*);
 int             getVariable(char*, char*);
 int             remVariable(char*);
+int 			set_priority(int); //TASK 3.4
 
 // swtch.S
 void            swtch(struct context**, struct context*);

@@ -34,4 +34,5 @@ SYSCALL(uptime)
 SYSCALL(setVariable)
 SYSCALL(getVariable)
 SYSCALL(remVariable)
+SYSCALL(set_priority)
 

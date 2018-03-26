@@ -132,3 +132,16 @@ sys_remVariable(void){
 
   return remVariable(variable);
 }
+
+int sys_set_priority(void){
+
+  int priority;
+
+  if(argint(0, &priority) < 0)
+    return -1;
+
+  if((priority < 1) || (priority > 3))
+    return -1;
+  else
+    return set_priority(priority);
+}
