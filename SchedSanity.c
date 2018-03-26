@@ -54,6 +54,7 @@ void sanityTest(char* const type, int loop_size, int (*func)()){
   int k;
   for(k=0; k < loop_size; k++){
 
+    printf(1, "procPids[%d]: %d\n", k, procPids[k]);
     wait2(procPids[k], &wtime, &rtime, &iotime);
     wtimeAcc += wtime;
     rtimeAcc += rtime;
@@ -61,6 +62,7 @@ void sanityTest(char* const type, int loop_size, int (*func)()){
   }
 
   printAverages(type, loop_size, wtimeAcc, rtimeAcc, iotimeAcc);
+  // printAverages(type, loop_size, 100, 200, 300);
 }
 
 void printAverages(char* type, int loop_size, int wtimeAcc, int rtimeAcc, int iotimeAcc){
@@ -79,7 +81,7 @@ main(int argc, char *argv[])
 
   // sanityTest("Simple calc with Medium loop size", 10000000, simpleCalc);         // simple calculation within a medium sized loop
   // sanityTest("Simple calc with Very Large loop size", 1000000000, simpleCalc);   // simple calculation within a very large loop
-  // sanityTest("Print to Screen with Medium loop size", 1000, printToScreen);      // printing to screen within a medium sized loop
+  sanityTest("Print to Screen with Medium loop size", 10, printToScreen);      // printing to screen within a medium sized loop
   // sanityTest("Print to Screen with Very Large loop size", 10000, printToScreen); // printing to screen within a very large loop
 
   exit();
