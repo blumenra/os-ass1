@@ -78,12 +78,12 @@ void resetStr(char* buf){
 
 int getIndexOfChar(char c, char* str){
 
-  printf(1, "strlen: %d\n", strlen(str));  
+  //printf(1, "strlen: %d\n", strlen(str));  
   int i;
   for(i=0; i < strlen(str); i++){
 
-    printf(1, "c: %c\n", c);
-    printf(1, "str[%d]: %c\n", i, str[i]);
+    //printf(1, "c: %c\n", c);
+    //printf(1, "str[%d]: %c\n", i, str[i]);
     if(c == str[i])
       return i;
   }

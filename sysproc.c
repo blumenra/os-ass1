@@ -101,19 +101,28 @@ sys_uptime(void)
 int
 sys_setVariable(void){
   
-  char* variable = "";
-  char* value = "";
+  char* variable[32];
+  char* value[128];
 
-  return setVariable(variable, value);
+  if(argstr(0, variable) < 0)
+    return -1;
+
+  if(argstr(1, value) < 0)
+    return -1;
+
+  return setVariable(*variable, *value);
 }
 
 int
 sys_getVariable(void){
   
-  char* variable = "";
-  char* value = "";
+  char* variable[32];
+  char* value[128];
 
-  return getVariable(variable, value);
+  if(argstr(0, variable) < 0)
+    return -1;
+
+  return getVariable(*variable, *value);
 }
 
 int

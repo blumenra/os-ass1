@@ -34,96 +34,144 @@ int isVarTableEmpty(void);
 int checkInputCorrectness(char*, char*);
 int isAlphaBetStr(char*);
 int isAlphaBetChar(char);
-char* resetBuf(char*);
+void resetnBuf(char*, int);
+void resetBuf(char*);
+void resetVar(char*);
+void resetValue(char*);
 void clearAssignment(int);
+void setAssignment(int, char*, char*);
+void printAssignment(assignment*);
 
-// Append a new allocated assignLink to var_table
-void clearAssignment(int index){
+void setAssignment(int index, char* var, char* value){
+  
+  clearAssignment(index); // reset var and value of assignment to zeros
 
-  resetBuf(var_table[index]->var);
-  resetBuf(var_table[index]->value);
+  strncpy(var_table[index]->var, var, strlen(var));
+  strncpy(var_table[index]->value, value, strlen(value));
 }
 
-char* resetBuf(char* buf){
+void printAssignment(assignment* ass){
+  
+  cprintf("value: ");
+  cprintf(ass->value);
+  cprintf("\n");
+  cprintf("var: ");
+  cprintf(ass->var);
+  cprintf("\n");
+}
 
-	int i;
-	for (i=0; i < strlen(buf); i++){
-		
-		buf[i] = 0;
-	}
+void clearAssignment(int index){
 
-  return buf;
+  resetVar(var_table[index]->var);
+  resetValue(var_table[index]->value);
+}
+
+void resetVar(char* var){
+
+  resetnBuf(var, MAX_VAR);
+}
+
+void resetValue(char* value){
+
+  resetnBuf(value, MAX_VALUE);
+}
+
+void resetnBuf(char* buf, int n){
+
+  int i;
+  for(i=0; i < n; i++){
+    buf[i] = 0;
+  }
+}
+
+void resetBuf(char* buf){
+
+  resetnBuf(buf, strlen(buf));
 }
 
 int isAlphaBetChar(char c){
 
-	if((c < 65) || (c > 90 && c < 97) || (c > 122)){
+  if((c < 65) || (c > 90 && c < 97) || (c > 122)){
 
-		return NULL;
-	}
-	else
-		return 1;
+    return NULL;
+  }
+  else
+    return 1;
 }
 
 int isAlphaBetStr(char* str){
 
-	int i;
-	for(i=0; i < strlen(str); i++){
-		if(!isAlphaBetChar(str[i]))
-			return NULL;
-	}
+  int i;
+  for(i=0; i < strlen(str); i++){
+    if(!isAlphaBetChar(str[i]))
+      return NULL;
+  }
 
-	return 1;
+  return 1;
 }
 
 int checkInputCorrectness(char* variable, char* value){
 
-	if(
-		!isAlphaBetStr(variable) ||
-		(strlen(variable) > MAX_VAR) || 
-		(strlen(value) > MAX_VALUE)){
+  if(
+    !isAlphaBetStr(variable) ||
+    (strlen(variable) > MAX_VAR) || 
+    (strlen(value) > MAX_VALUE)){
 
-		return NULL;
-	}
+    return NULL;
+  }
 
-	return 1;
+  return 1;
 }
 
 int isVarTableFull(){
-	
-	if(var_table_size == MAX_VARIABLES)
-		return 1;
-	else
-		return 0;
+  
+  if(var_table_size == MAX_VARIABLES)
+    return 1;
+  else
+    return 0;
 }
 
 int isVarTableEmpty(){
 
-	if(var_table_size == 0)
-		return 1;
-	else
-		return 0;
+  if(var_table_size == 0)
+    return 1;
+  else
+    return 0;
 }
 
+// Append a new allocated assignLink to var_table
 int addVar(char* variable, char* value){
 
-	if(isVarTableFull())
-		return -1;
+  cprintf("Inside addVar\n");
+
+  if(isVarTableFull())
+    return -1;
 
 	int i=0;
 	while(i < MAX_VARIABLES){
 
 		if(var_table[i] == NULL){
 
-      clearAssignment(i);
-			strncpy(var_table[i]->var, variable, strlen(variable));
-      strncpy(var_table[i]->value, value, strlen(value));
-			var_table_size++; // add size of var_table by 1
-			return 0;
-		}
 
-		i++;
-	}
+
+      cprintf("variable: ");
+      cprintf(variable);
+      cprintf("\n");
+
+      cprintf("value: ");
+      cprintf(value);
+      cprintf("\n");
+
+			setAssignment(i, variable, value);
+			var_table_size++; // add size of var_table by 1
+      
+      printAssignment(var_table[i]); //REMOVE ME
+      break;
+    }
+
+    i++;
+  }
+
 
   return 0;
 }
@@ -692,6 +740,11 @@ setVariable(char* variable, char* value){
 
 			resetBuf(var_table[i]->value);
 			strncpy(var_table[i]->value, value, strlen(value));
+
+      cprintf("Right before returning from setVariable. var_table[i]->value: ");
+      cprintf(var_table[i]->value);
+      cprintf("\n");
+
 			return 0;
 		}
 
@@ -706,16 +759,22 @@ setVariable(char* variable, char* value){
 int
 getVariable(char* variable, char* value){
 
-  cprintf("Inside getVariable. variable: ", variable);
+  cprintf("Inside getVariable. variable: ");
   cprintf(variable);
+  cprintf("\n");
   
 	int i=0;
 	while(i < MAX_VARIABLES){
 
 		if(strncmp(var_table[i]->var, variable, strlen(variable)) == 0){
 
-			strncpy(value, var_table[i]->var, strlen(var_table[i]->var));
-			return 0;
+			strncpy(value, var_table[i]->value, strlen(var_table[i]->value));
+
+      cprintf("Right before returning from getVariable. value: ");
+    	cprintf(value);
+      cprintf("\n");		
+
+      return 0;
 		}
 
 		i++;
