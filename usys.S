@@ -30,9 +30,14 @@ SYSCALL(sbrk)
 SYSCALL(sleep)
 SYSCALL(uptime)
 
-// our impls
+//TASK 2
+SYSCALL(wait2)
+
+//TASK 1.2
 SYSCALL(setVariable)
 SYSCALL(getVariable)
 SYSCALL(remVariable)
+
+//TASK 3.4
 SYSCALL(set_priority)
 

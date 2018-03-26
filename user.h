@@ -25,10 +25,15 @@ int sleep(int);
 int uptime(void);
 int yield(void);
 
-// our impl
+//TASK 2
+int wait2(int pid, int* wtime, int* rtime, int* iotime);
+
+// TASK 1.2
 int setVariable(char*, char*);
 int getVariable(char*, char*);
 int remVariable(char*);
+
+//TASK 3.4
 int set_priority(int);
 
 // ulib.c

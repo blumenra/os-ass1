@@ -97,6 +97,13 @@ sys_uptime(void)
   return xticks;
 }
 
+int
+sys_wait2(void)
+{
+  return wait2(); //arguments?
+}
+
+
 //our impls
 int
 sys_setVariable(void){

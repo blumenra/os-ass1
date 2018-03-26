@@ -50,6 +50,13 @@ struct proc {
   struct inode *cwd;           // Current directory
   char name[16];               // Process name (debugging)
 
+  //TASK 2
+  int ctime;                   // creation time of a process
+  int etime;                   // end time
+  int iotime;                  // total time of waiting for I/O
+  int rtime;                   // total running time of the process
+
+  //TASK 3
   int rContTime;               // runtime which was accumulated continuesly
   float remApproxTime;
   int priority;

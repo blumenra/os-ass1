@@ -22,9 +22,15 @@
 #define SYS_close  21
 #define SYS_yield  22
 
-// our impl
-#define SYS_setVariable  23
-#define SYS_getVariable  24
-#define SYS_remVariable  25
-#define SYS_set_priority  26
+//TASK 2
+#define SYS_wait2  23
+
+// TASK 1.2
+#define SYS_setVariable  24
+#define SYS_getVariable  25
+#define SYS_remVariable  26
+
+// TASK 3.4
+#define SYS_set_priority  27
+
 

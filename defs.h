@@ -120,6 +120,11 @@ void            userinit(void);
 int             wait(void);
 void            wakeup(void*);
 void            yield(void);
+
+//our addition
+extern uint     ticks;
+int             wait2(int pid, int* wtime, int* rtime, int* iotime);
+
 //our impl
 int             setVariable(char*, char*);
 int             getVariable(char*, char*);
