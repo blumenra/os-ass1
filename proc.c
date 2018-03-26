@@ -62,7 +62,7 @@ void printAssignment(assignment* ass){
 
 int updateApproxTime(struct proc*);
 //TASK 3.4
-int calcProcRatio(struct proc*);
+double calcProcRatio(struct proc*);
 
 double calcProcRatio(struct proc* p){
 
@@ -81,7 +81,7 @@ double calcProcRatio(struct proc* p){
        decFactor = 1.25;
        break;
     default :
-       printf(2, "Invalid priority!\n");
+       cprintf("Invalid priority!\n");
   }
 
 
@@ -100,10 +100,8 @@ int updateApproxTime(struct proc *p){
 
     return 1;
   }
-  else{
-    return 0;
-  }
-
+  
+  return 0;
 }
 
 void clearAssignment(int index){
@@ -993,7 +991,8 @@ remVariable(char* variable){
 // The input correctness is checked in sys_set_priority(void) which is in sysproc.c
 int set_priority(int priority){
 
-  p->priority = priority;
+  myproc()->priority = priority;
   
   return 0;
 }
+
