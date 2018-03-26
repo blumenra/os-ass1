@@ -41,6 +41,8 @@ void resetValue(char*);
 void clearAssignment(int);
 void setAssignment(int, char*, char*);
 void printAssignment(assignment*);
+void updateProcsData(void);
+
 
 void setAssignment(int index, char* var, char* value){
   
@@ -593,7 +595,7 @@ wait2(int pid, int* wtime, int* rtime, int* iotime)
     // Scan through table looking for exited children.
     havekids = 0;
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-      if(p->pid == pid){
+      if(p->pid == pid){ //if i found a son(!) with the given pid.. 
         havekids = 1;
         if(p->state == ZOMBIE){
             // Found one.
@@ -606,10 +608,12 @@ wait2(int pid, int* wtime, int* rtime, int* iotime)
             p->name[0] = 0;
             p->killed = 0;
             p->state = UNUSED;
+
+              *rtime = p->rtime;
+              *iotime = p->iotime;
+              *wtime = p->etime - p->ctime - p->iotime - p->rtime;
+
             release(&ptable.lock);
-            *rtime = p->rtime;
-            *iotime = p->iotime;
-            *wtime = p->etime - p->ctime - p->iotime - p->rtime;
             return 0;
         }
   }
@@ -683,7 +687,7 @@ scheduler(void)
     struct proc *p;
     struct proc *minProc = NULL;
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-      cprintf("ptable size: %d\n", ptable)
+
       if(p->state == RUNNABLE){
         if(minProc != NULL){
 
@@ -1085,3 +1089,21 @@ int set_priority(int priority){
   return 0;
 }
 
+void updateProcsData(){
+
+  struct proc *p;
+  acquire(&ptable.lock);
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    switch(p->state) {
+      case SLEEPING:
+        p->iotime++;
+        break;
+      case RUNNING:
+        p->rtime++;
+        break;
+      default:
+        ;
+    }
+  }
+  release(&ptable.lock);
+}

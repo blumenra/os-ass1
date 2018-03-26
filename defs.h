@@ -120,6 +120,7 @@ void            userinit(void);
 int             wait(void);
 void            wakeup(void*);
 void            yield(void);
+void			updateProcsData(void);
 
 //our addition
 extern uint     ticks;
