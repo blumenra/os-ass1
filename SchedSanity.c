@@ -3,14 +3,17 @@
 #include "user.h"
 #include "fs.h"
 
-void printAverages(char*, int, int, int, int);
-int printToScreen(void);
+#define CALC 1
+#define IO 2
+
+void printAverages(int, int, int, int, int);
+int IOfunc(void);
 int simpleCalc(void);
-void sanityTest(char* const type, int num_of_procs, int loop_size, int (*func)());
+void sanityTest(int type, int num_of_procs, int loop_size, int (*func)());
 
-int printToScreen(){
+int IOfunc(){
 
-  printf(1, "Printing to screen..\n");
+  sleep(1);
   return 0;
 }
 
@@ -19,7 +22,7 @@ int simpleCalc(){
   return 1+2*9;
 }
 
-void sanityTest(char* const type, int num_of_procs, int loop_size, int (*func)()){
+void sanityTest(int type, int num_of_procs, int loop_size, int (*func)()){
     
   printf(1, "Starting sanityTest..\n");
 
@@ -36,15 +39,22 @@ void sanityTest(char* const type, int num_of_procs, int loop_size, int (*func)()
 
     currPid = fork();
 
-    if(currPid == 0){
+    if(currPid == 0){ // I'M THE CHILD HERE..
 
-      // I'M THE CHILD HERE..
-      
+      set_priority((i%3)+1);
+
       int j;
       for(j=0; j < loop_size; j++){
 
-        (*func)();
-        
+        // (*func)();
+        int calcAcc = 0;
+
+        if((type == 1) || (type == 2))
+          calcAcc++;
+        else
+          sleep(1);
+          
+
         // if(1+2*9);
         //   continue;
 
@@ -78,19 +88,24 @@ void sanityTest(char* const type, int num_of_procs, int loop_size, int (*func)()
     iotime = 0;
   }
 
-  printf(1, "Final wtimeAcc: %d\n", wtimeAcc);
-  printf(1, "Final rtimeAcc: %d\n", rtimeAcc);
-  printf(1, "Final iotimeAcc: %d\n", iotimeAcc);
+  // printf(1, "Final wtimeAcc: %d\n", wtimeAcc);
+  // printf(1, "Final rtimeAcc: %d\n", rtimeAcc);
+  // printf(1, "Final iotimeAcc: %d\n", iotimeAcc);
 
   printAverages(type, num_of_procs, wtimeAcc, rtimeAcc, iotimeAcc);
 }
 
-void printAverages(char* type, int num_of_procs, int wtimeAcc, int rtimeAcc, int iotimeAcc){
+void printAverages(int type, int num_of_procs, int wtimeAcc, int rtimeAcc, int iotimeAcc){
 
-  printf(1, "%s\n", type);
-  printf(1, "   Average wtime: %d\n", wtimeAcc/num_of_procs);
-  printf(1, "   Average rtime: %d\n", rtimeAcc/num_of_procs);
-  printf(1, "   Average iotime: %d\n", iotimeAcc/num_of_procs);
+  // printf(1, "%s\n", type);
+  printf(1, "%d: wtime - %d, rtime - %d, iotime - %d\n",
+          type,
+          wtimeAcc/num_of_procs,
+          rtimeAcc/num_of_procs,
+          iotimeAcc/num_of_procs);
+  // printf(1, "2:   Average wtime: %d\n", wtimeAcc/num_of_procs);
+  // printf(1, "   Average rtime: %d\n", rtimeAcc/num_of_procs);
+  // printf(1, "   Average iotime: %d\n", iotimeAcc/num_of_procs);
 }
 
 int
@@ -98,10 +113,10 @@ main(int argc, char *argv[]){
   
   int num_of_procs = 10;
 
-  // sanityTest("Simple calc with Medium loop size", num_of_procs, 10000000, simpleCalc);         // simple calculation within a medium sized loop1
-  // sanityTest("Simple calc with Very Large loop size", num_of_procs, 1000000000, simpleCalc);   // simple calculation within a very large loop
-  sanityTest("Print to Screen with Medium loop size", num_of_procs, 1000, printToScreen);      // printing to screen within a medium sized loop
-  // sanityTest("Print to Screen with Very Large loop size", num_of_procs, 10000, printToScreen); // printing to screen within a very large loop
+  sanityTest(1, num_of_procs, 10000000, simpleCalc);         // simple calculation within a medium sized loop1
+  sanityTest(2, num_of_procs, 1000000000, simpleCalc);   // simple calculation within a very large loop
+  sanityTest(3, num_of_procs, 1000, IOfunc);      // printing to screen within a medium sized loop
+  sanityTest(4, num_of_procs, 10000, IOfunc); // printing to screen within a very large loop
 
   exit();
 }
