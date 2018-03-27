@@ -104,15 +104,21 @@ trap(struct trapframe *tf)
   if(myproc() && myproc()->killed && (tf->cs&3) == DPL_USER)
     exit();
 
+  int fcfs=0;
+  #ifdef FCFS
+    fcfs = 1;
 
-  #ifndef FCFS
+  #endif  
+
+  if(!fcfs){
+
     // Force process to give up CPU on clock tick.
     // If interrupts were on while locks held, would need to check nlock.
     if(myproc() && myproc()->state == RUNNING &&
-       tf->trapno == T_IRQ0+IRQ_TIMER && myproc()->rContTime >= QUANTUM)
-        yield();
-
-  #endif
+       tf->trapno == T_IRQ0+IRQ_TIMER && myproc()->rContTime >= QUANTUM){
+      yield();
+    }
+  }
 
     
   // Check if the process has been killed since we yielded
