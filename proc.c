@@ -595,7 +595,7 @@ wait2(int pid, int* wtime, int* rtime, int* iotime)
     // Scan through table looking for exited children.
     havekids = 0;
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-      if(p->pid == pid){ //if i found a son(!) with the given pid.. 
+      if(p->pid == pid && p->parent == curproc){ //if i found a son(!) with the given pid.. 
         havekids = 1;
         if(p->state == ZOMBIE){
 
@@ -614,13 +614,13 @@ wait2(int pid, int* wtime, int* rtime, int* iotime)
             p->state = UNUSED;
 
             //our addition. reset all fields
-            p->ctime = 0;
-            p->etime = 0;
-            p->iotime = 0;
-            p->rtime = 0;
-            p->rContTime = 0;
-            p->remApproxTime = 0;
-            p->priority = 0;
+            // p->ctime = 0;
+            // p->etime = 0;
+            // p->iotime = 0;
+            // p->rtime = 0;
+            // p->rContTime = 0;
+            // p->remApproxTime = 0;
+            // p->priority = 0;
 
             
             release(&ptable.lock);
@@ -670,6 +670,8 @@ scheduler(void)
       if(p->state != RUNNABLE)
         continue;
 
+
+      // cprintf("************************");
       // printProcData(p); //REMOVE ME
 
       // Switch to chosen process.  It is the process's job
@@ -701,10 +703,10 @@ scheduler(void)
       if(p->state == RUNNABLE){
         if(minProc != NULL){
 
-          cprintf(">>>>>>>>>>>>>>>>");
-          printProcData(p); //REMOVE ME
-          printProcData(minProc); //REMOVE ME
-          cprintf("<<<<<<<<<<<<<<<<");
+          // cprintf(">>>>>>>>>>>>>>>>");
+          // printProcData(p); //REMOVE ME
+          // printProcData(minProc); //REMOVE ME
+          // cprintf("<<<<<<<<<<<<<<<<");
 
           if(p->ctime < minProc->ctime){
 
@@ -720,7 +722,7 @@ scheduler(void)
 
       if(minProc != NULL){
 
-        printProcData(minProc); //REMOVE ME
+        // printProcData(minProc); //REMOVE ME
         p = minProc;
 
         // Switch to chosen process.  It is the process's job
@@ -836,6 +838,7 @@ scheduler(void)
     #endif
     #endif
     #endif
+
 
     release(&ptable.lock);
 
