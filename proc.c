@@ -598,8 +598,12 @@ wait2(int pid, int* wtime, int* rtime, int* iotime)
       if(p->pid == pid){ //if i found a son(!) with the given pid.. 
         havekids = 1;
         if(p->state == ZOMBIE){
-            // Found one.
-            //pid = p->pid;
+
+            //our addition. saving data for later use
+            rtime[0] = p->rtime;
+            iotime[0] = p->iotime;
+            wtime[0] = p->etime - p->ctime - p->iotime - p->rtime;
+
             kfree(p->kstack);
             p->kstack = 0;
             freevm(p->pgdir);
@@ -609,14 +613,20 @@ wait2(int pid, int* wtime, int* rtime, int* iotime)
             p->killed = 0;
             p->state = UNUSED;
 
-              *rtime = p->rtime;
-              *iotime = p->iotime;
-              *wtime = p->etime - p->ctime - p->iotime - p->rtime;
+            //our addition. reset all fields
+            p->ctime = 0;
+            p->etime = 0;
+            p->iotime = 0;
+            p->rtime = 0;
+            p->rContTime = 0;
+            p->remApproxTime = 0;
+            p->priority = 0;
 
+            
             release(&ptable.lock);
             return 0;
         }
-  }
+      }
     }
 
     // No point waiting if we don't have any children.
@@ -1100,6 +1110,7 @@ void updateProcsData(){
         break;
       case RUNNING:
         p->rtime++;
+        p->rContTime++;
         break;
       default:
         ;
