@@ -85,7 +85,7 @@ double calcProcRatio(struct proc* p){
 
   double decFactor = 0;
   int wtime;
-  double ans;
+  double ratio;
 
   switch(p->priority) {
     case 1 :
@@ -102,24 +102,13 @@ double calcProcRatio(struct proc* p){
   }
 
 
-  wtime = p->ctime - p->iotime - p->rtime;
+  wtime = ticks - p->ctime - p->iotime - p->rtime;
 
-  ans = (p->rtime * decFactor)/(p->rtime + wtime);
+  ratio = (p->rtime * decFactor)/(p->rtime + wtime);
 
-  return ans;
+  return ratio;
 }
 
-int updateApproxTime(struct proc *p){
-
-  if(p->rtime >= p->remApproxTime){
-
-    p->remApproxTime = p->remApproxTime + ALPHA*p->remApproxTime;    
-
-    return 1;
-  }
-  
-  return 0;
-}
 
 void clearAssignment(int index){
 
@@ -341,7 +330,7 @@ found:
   p->pid = nextpid++;
 
   //TASK 2
-  p->ctime = ticks;
+  // p->ctime = ticks;
   p->etime = 0;
   p->iotime = 0;
   p->rtime = 0;
@@ -465,6 +454,7 @@ fork(void)
   np->parent = curproc;
   *np->tf = *curproc->tf;
 
+  np->ctime = ticks;
   np->priority = curproc->priority; // our addition. Not sure if it suppose to be here..
 
   // Clear %eax so that fork returns 0 in the child.
@@ -534,6 +524,9 @@ exit(void)
   // Jump into the scheduler, never to return.
   curproc->state = ZOMBIE;
   sched();
+
+  printProcData(myproc());
+
   panic("zombie exit");
 }
 
@@ -614,13 +607,13 @@ wait2(int pid, int* wtime, int* rtime, int* iotime)
             p->state = UNUSED;
 
             //our addition. reset all fields
-            // p->ctime = 0;
-            // p->etime = 0;
-            // p->iotime = 0;
-            // p->rtime = 0;
-            // p->rContTime = 0;
-            // p->remApproxTime = 0;
-            // p->priority = 0;
+            p->ctime = 0;
+            p->etime = 0;
+            p->iotime = 0;
+            p->rtime = 0;
+            p->rContTime = 0;
+            p->remApproxTime = 0;
+            p->priority = 0;
 
             
             release(&ptable.lock);
@@ -667,11 +660,15 @@ scheduler(void)
     
     struct proc *p;
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+      // printProcData(p); //REMOVE ME
+      // cprintf("BLAAAAAAAAAAAA\n");
+      // find the first runnable in ptable
       if(p->state != RUNNABLE)
         continue;
 
 
       // cprintf("************************");
+      // printProcData(p); //REMOVE ME
       // printProcData(p); //REMOVE ME
 
       // Switch to chosen process.  It is the process's job
@@ -711,36 +708,35 @@ scheduler(void)
           if(p->ctime < minProc->ctime){
 
             minProc = p;
-            //continue;
+            // continue;
           }
         }
         else{
           minProc = p;
         }
       }
+    }
 
+    if(minProc != NULL){
 
-      if(minProc != NULL){
+      // printProcData(minProc); //REMOVE ME
+      p = minProc;
 
-        // printProcData(minProc); //REMOVE ME
-        p = minProc;
+      // Switch to chosen process.  It is the process's job
+      // to release ptable.lock and then reacquire it
+      // before jumping back to us.
+      c->proc = p;
+      switchuvm(p);
+      p->state = RUNNING;
 
-        // Switch to chosen process.  It is the process's job
-        // to release ptable.lock and then reacquire it
-        // before jumping back to us.
-        c->proc = p;
-        switchuvm(p);
-        p->state = RUNNING;
+      swtch(&(c->scheduler), p->context);
+      switchkvm();
 
-        swtch(&(c->scheduler), p->context);
-        switchkvm();
-
-        // Process is done running for now.
-        // It should have changed its p->state before coming back.
-        c->proc = 0;
-        p->rContTime = 0;
-        
-      }
+      // Process is done running for now.
+      // It should have changed its p->state before coming back.
+      c->proc = 0;
+      p->rContTime = 0;
+      
     }
     
     #else
@@ -754,6 +750,12 @@ scheduler(void)
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
       if(p->state == RUNNABLE){
         if(srtProc != NULL){
+
+          // cprintf(">>>>>>>>>>>>>>>>");
+          // printProcData(p); //REMOVE ME
+          // printProcData(srtProc); //REMOVE ME
+          // cprintf("<<<<<<<<<<<<<<<<");
+
           if(p->remApproxTime < srtProc->remApproxTime){
 
             srtProc = p;
@@ -765,29 +767,29 @@ scheduler(void)
         }
       }
 
-      if(srtProc != NULL){
-        
-        p = srtProc;
-        
+    }
+    if(srtProc != NULL){
+      
+      p = srtProc;
+      
 
-        
-        // Switch to chosen process.  It is the process's job
-        // to release ptable.lock and then reacquire it
-        // before jumping back to us.
-        c->proc = p;
-        switchuvm(p);
-        p->state = RUNNING;
+      
+      // Switch to chosen process.  It is the process's job
+      // to release ptable.lock and then reacquire it
+      // before jumping back to us.
+      c->proc = p;
+      switchuvm(p);
+      p->state = RUNNING;
 
-        swtch(&(c->scheduler), p->context);
-        switchkvm();
+      swtch(&(c->scheduler), p->context);
+      switchkvm();
 
-        updateApproxTime(p); // our addition
+      // updateApproxTime(p); // our addition
 
-        // Process is done running for now.
-        // It should have changed its p->state before coming back.
-        c->proc = 0;
-        p->rContTime = 0;
-      }
+      // Process is done running for now.
+      // It should have changed its p->state before coming back.
+      c->proc = 0;
+      p->rContTime = 0;
     }
 
     #else
@@ -810,28 +812,27 @@ scheduler(void)
           cfsdProc = p;
         }
       }
+    }
+    if(cfsdProc != NULL){
+      
+      p = cfsdProc;
+      
 
-      if(cfsdProc != NULL){
-        
-        p = cfsdProc;
-        
+      
+      // Switch to chosen process.  It is the process's job
+      // to release ptable.lock and then reacquire it
+      // before jumping back to us.
+      c->proc = p;
+      switchuvm(p);
+      p->state = RUNNING;
 
-        
-        // Switch to chosen process.  It is the process's job
-        // to release ptable.lock and then reacquire it
-        // before jumping back to us.
-        c->proc = p;
-        switchuvm(p);
-        p->state = RUNNING;
+      swtch(&(c->scheduler), p->context);
+      switchkvm();
 
-        swtch(&(c->scheduler), p->context);
-        switchkvm();
-
-        // Process is done running for now.
-        // It should have changed its p->state before coming back.
-        c->proc = 0;
-        p->rContTime = 0;
-      }
+      // Process is done running for now.
+      // It should have changed its p->state before coming back.
+      c->proc = 0;
+      p->rContTime = 0;
     }
 
     #endif
@@ -1107,17 +1108,44 @@ void updateProcsData(){
   struct proc *p;
   acquire(&ptable.lock);
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    
+    updateApproxTime(p);
     switch(p->state) {
       case SLEEPING:
+        // updateApproxTime(p);
         p->iotime++;
         break;
       case RUNNING:
+        // updateApproxTime(p);
         p->rtime++;
         p->rContTime++;
+        break;
+      case RUNNABLE:
+        // updateApproxTime(p);
         break;
       default:
         ;
     }
   }
   release(&ptable.lock);
+}
+
+int updateApproxTime(struct proc *p){
+
+
+  // acquire(&ptable.lock);
+
+  // cprintf("%d\n", myproc()->pid);
+  // cprintf("BLAAAAA\n");
+  // release(&ptable.lock);
+  // printProcData(p);
+
+  if(p->rtime >= p->remApproxTime){
+
+    p->remApproxTime = p->remApproxTime + ALPHA*p->remApproxTime;    
+
+    return 1;
+  }
+  
+  return 0;
 }
