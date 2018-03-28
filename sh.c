@@ -263,6 +263,23 @@ getcmd(char *buf, int nbuf)
   return 0;
 }
 
+    /*TESTS. REMOVE ME
+    char retVal[MAX_CMD_SIZE];
+    char* var = "x";
+    char* value = "alon";
+    char* var2 = "y";
+    char* value2 = "123";
+    if(setVariable(var, value) == 0){
+        printf(1, "Set %s to %s properly\n", var, value);
+      
+      if(setVariable(var2, value2) == 0)
+        printf(1, "Set %s to %s properly\n", var2, value2);
+
+      if(getVariable(var, retVal) == 0)
+        printf(1, "returned x=%s\n", retVal);
+    }*/
+
+    
 int
 main(void)
 {
@@ -276,7 +293,6 @@ main(void)
       break;
     }
   }
-
   // creates 16 new buffers for the history commands
   int i;
   for(i=0; i < MAX_HISTORY; i++){
@@ -291,35 +307,77 @@ main(void)
 
     //looking for assignmemt in buf
     int index = getIndexOfChar('=', buf);
-    char* var = (char*)malloc(sizeof(char) * 32); ///needs to be free!
-    strncpy(var, buf, index-1);
+    char var[MAX_CMD_SIZE];
     if (index > 0){
-        char* value = (char*)malloc(sizeof(char) * 128);
+        strncpy(var, buf, index-1);
+        char value[MAX_CMD_SIZE];
         strcpy(value, buf+strlen(buf)-(strlen(buf)-index-1));
         int ans = setVariable(var ,value);
+        printf(1, "var %s + val %s\n", var, value);
         switch(ans){
-            case 0:
+            case 0 :
                 printf(1, "Variable set correctly\n");
-            case -1:
+            case -1 :
                 printf(1, "No room for additional variables\n");
-            default:
+            case -2 :
                 printf(1, "Input is illegal\n");
+        }
+    }
+    
+    //*********************************************** $$$$$$$$$$$$$$$$$$$$ ///
+    //maximum possible buf size = 100
+    char bufProxy[MAX_CMD_SIZE];
+    int i_proxy = 0;
+    for (int i = 0; i<strlen(buf) ; i++){
+        if (buf[i] == '$'){
+            i++;
+            char var_name[100];
+            char value[100];
+            int i_tmp = 0;
+            //copy only the variable name
+            while (buf[i] != ' ' && buf[i] != '\0' && buf[i]!= '\n' && buf[i] != '$'){
+                var_name[i_tmp] = buf[i];
+                i_tmp++;
+                i++;
+            }
+            i--;
+            var_name[i_tmp] = '\0';
+            if (getVariable(var_name, value) == -1){
+                printf(2, "variable %s not in the table\n", var_name);
+                continue;
+            }
+            int i_value = 0;
+            while (value[i_value] != '\0' && value[i_value] != '\n'){
+                bufProxy[i_proxy++] = value[i_value++];
+            }
+            
+        //else bufProxy[i_proxy++] = buf[i];
+            
+            char final[100];
+            final[0]=0;
+            int j = 0;
+            while (j < i){
+                final[j] = buf[j];
+                j++;
+            }
+            
+            int k = 0;
+            while (bufProxy[k] != '\0' && bufProxy[k] != '\n'){
+                final[j] = bufProxy[k];
+                k++;
+            }
         }
     }
     
     
     
-    //echo $x
-    //getVariable(x, str); str = 000 >>> str = hello
-    //>
-    //buf = echo hello
     
+    
+    // $$$$$$$$$$$$$$$$$$$$$$$$$$ 
     
     //searches for = $ sends to syscalls
     //*/
-    
-    
-    
+
     if(buf[0] == 'c' && buf[1] == 'd' && buf[2] == ' '){
       // Chdir must be called by the parent, not the child.
       buf[strlen(buf)-1] = 0;  // chop \n

@@ -52,7 +52,7 @@ void sanityTest(int type, int num_of_procs, int loop_size, int (*func)()){
         if((type == 1) || (type == 2))
           calcAcc++;
         else
-          // sleep(1);
+          sleep(1);
       }
 
       exit(); // kill child

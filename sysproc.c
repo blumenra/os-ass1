@@ -148,6 +148,9 @@ sys_getVariable(void){
   if(argstr(0, variable) < 0)
     return -1;
 
+  if(argstr(1, value) < 0)
+    return -1;
+
   return getVariable(*variable, *value);
 }
 

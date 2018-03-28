@@ -22,7 +22,7 @@ typedef struct {
 } assignment;
 
 // var table functions
-assignment* var_table[MAX_VARIABLES];
+assignment var_table[MAX_VARIABLES][sizeof(assignment)];
 int var_table_size = 0;
 
 // extern char* strcpy(char*, char*);
@@ -42,24 +42,43 @@ void clearAssignment(int);
 void setAssignment(int, char*, char*);
 void printAssignment(assignment*);
 void updateProcsData(void);
+char* strcpy(char*, char*);
+int strcmp(char*, char*);
+int availableAssign(int);
 
+//our addition
+char* strcpy(char *s, char *t){
+  strncpy(s, t, strlen(t));
+  return s;
+}
+
+int strcmp(char *s, char *t){
+  
+  return strncmp(s, t, strlen(t));
+}
+
+int availableAssign(int index){
+
+  int ans = 0;
+
+  if(var_table[index]->var[0] == NULL)
+    ans = 1;
+
+  return ans;
+}
 
 void setAssignment(int index, char* var, char* value){
   
   clearAssignment(index); // reset var and value of assignment to zeros
 
-  strncpy(var_table[index]->var, var, strlen(var));
-  strncpy(var_table[index]->value, value, strlen(value));
+  strcpy(var_table[index]->var, var);
+  strcpy(var_table[index]->value, value);
 }
 
 void printAssignment(assignment* ass){
   
-  cprintf("value: ");
-  cprintf(ass->value);
-  cprintf("\n");
-  cprintf("var: ");
-  cprintf(ass->var);
-  cprintf("\n");
+  cprintf("var: %s\n", ass->var);
+  cprintf("value: %s\n", ass->value);
 }
 
 int updateApproxTime(struct proc*);
@@ -194,27 +213,19 @@ int addVar(char* variable, char* value){
 
   cprintf("Inside addVar\n");
 
+
   if(isVarTableFull())
     return -1;
 
-	int i=0;
-	while(i < MAX_VARIABLES){
+  
+  int i=0;
+  while(i < MAX_VARIABLES){
 
-		if(var_table[i] == NULL){
-
-      cprintf("variable: ");
-      cprintf(variable);
-      cprintf("\n");
-
-      cprintf("value: ");
-      cprintf(value);
-      cprintf("\n");
+    if(availableAssign(i)){
 
 			setAssignment(i, variable, value);
-
 			var_table_size++; // add size of var_table by 1
-      
-      printAssignment(var_table[i]); //REMOVE ME
+
       break;
     }
 
@@ -235,7 +246,8 @@ int removeVar(char* variable){
 
 		if(strncmp(var_table[i]->var, variable, strlen(variable)) == 0){
 
-			var_table[i] = NULL;
+      clearAssignment(i);
+			// var_table[i] = NULL;
 			return 0;
 		}
 
@@ -1052,27 +1064,29 @@ setVariable(char* variable, char* value){
 	}
 
 	// if variable wasn't in the table yet, add it
-	return addVar(variable, value);
+  int ret = addVar(variable, value);
+  
+	return ret;
 
 }
 
 int
 getVariable(char* variable, char* value){
 
-  cprintf("Inside getVariable. variable: ");
-  cprintf(variable);
-  cprintf("\n");
+  cprintf("Inside getVariable. variable: %s, value: %s\n", variable, value);
   
 	int i=0;
 	while(i < MAX_VARIABLES){
 
-		if(strncmp(var_table[i]->var, variable, strlen(variable)) == 0){
 
-			strncpy(value, var_table[i]->value, strlen(var_table[i]->value));
+    if(strcmp(var_table[i]->var, variable) == 0){
+      
+      cprintf("Right before returning from getVariable. value: %s\n", value);
 
-      cprintf("Right before returning from getVariable. value: ");
-    	cprintf(value);
-      cprintf("\n");		
+      printAssignment(var_table[i]);
+      strcpy(value, var_table[i]->value);
+
+      cprintf("Right before returning from getVariable. value: %s\n", value);
 
       return 0;
 		}
