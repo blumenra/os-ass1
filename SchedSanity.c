@@ -52,14 +52,7 @@ void sanityTest(int type, int num_of_procs, int loop_size, int (*func)()){
         if((type == 1) || (type == 2))
           calcAcc++;
         else
-          sleep(1);
-          
-
-        // if(1+2*9);
-        //   continue;
-
-        // printf(1, "Hi\n");
-
+          // sleep(1);
       }
 
       exit(); // kill child
@@ -73,12 +66,8 @@ void sanityTest(int type, int num_of_procs, int loop_size, int (*func)()){
   int k;
   for(k=0; k < num_of_procs; k++){
 
-    // printf(1, "procPids[%d]: %d\n", k, procPids[k]);
-    // printf(1, "::::::rtime before wait2: %d\n", rtime);
-
     wait2(procPids[k], &wtime, &rtime, &iotime);
 
-    // printf(1, "::::::rtime after wait2: %d\n", rtime);
     wtimeAcc += wtime;
     rtimeAcc += rtime;
     iotimeAcc += iotime;
@@ -88,24 +77,16 @@ void sanityTest(int type, int num_of_procs, int loop_size, int (*func)()){
     iotime = 0;
   }
 
-  // printf(1, "Final wtimeAcc: %d\n", wtimeAcc);
-  // printf(1, "Final rtimeAcc: %d\n", rtimeAcc);
-  // printf(1, "Final iotimeAcc: %d\n", iotimeAcc);
-
   printAverages(type, num_of_procs, wtimeAcc, rtimeAcc, iotimeAcc);
 }
 
 void printAverages(int type, int num_of_procs, int wtimeAcc, int rtimeAcc, int iotimeAcc){
 
-  // printf(1, "%s\n", type);
   printf(1, "%d: wtime - %d, rtime - %d, iotime - %d\n",
           type,
           wtimeAcc/num_of_procs,
           rtimeAcc/num_of_procs,
           iotimeAcc/num_of_procs);
-  // printf(1, "2:   Average wtime: %d\n", wtimeAcc/num_of_procs);
-  // printf(1, "   Average rtime: %d\n", rtimeAcc/num_of_procs);
-  // printf(1, "   Average iotime: %d\n", iotimeAcc/num_of_procs);
 }
 
 int
