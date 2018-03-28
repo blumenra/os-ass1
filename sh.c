@@ -81,13 +81,11 @@ int getIndexOfChar(char c, char* str){
   //printf(1, "strlen: %d\n", strlen(str));  
   int i;
   for(i=0; i < strlen(str); i++){
-
     //printf(1, "c: %c\n", c);
     //printf(1, "str[%d]: %c\n", i, str[i]);
     if(c == str[i])
       return i;
   }
-
   return -1;
 }
 
@@ -291,6 +289,37 @@ main(void)
     //Add command to history array
     history_append(buf); // chops '\n' of buf in side
 
+    //looking for assignmemt in buf
+    int index = getIndexOfChar('=', buf);
+    char* var = (char*)malloc(sizeof(char) * 32); ///needs to be free!
+    strncpy(var, buf, index-1);
+    if (index > 0){
+        char* value = (char*)malloc(sizeof(char) * 128);
+        strcpy(value, buf+strlen(buf)-(strlen(buf)-index-1));
+        int ans = setVariable(var ,value);
+        switch(ans){
+            case 0:
+                printf(1, "Variable set correctly\n");
+            case -1:
+                printf(1, "No room for additional variables\n");
+            default:
+                printf(1, "Input is illegal\n");
+        }
+    }
+    
+    
+    
+    //echo $x
+    //getVariable(x, str); str = 000 >>> str = hello
+    //>
+    //buf = echo hello
+    
+    
+    //searches for = $ sends to syscalls
+    //*/
+    
+    
+    
     if(buf[0] == 'c' && buf[1] == 'd' && buf[2] == ' '){
       // Chdir must be called by the parent, not the child.
       buf[strlen(buf)-1] = 0;  // chop \n
