@@ -41,6 +41,7 @@ void resetValue(char*);
 void clearAssignment(int);
 void setAssignment(int, char*, char*);
 void printAssignment(assignment*);
+void printVarTable(void);
 void updateProcsData(void);
 char* strcpy(char*, char*);
 int strcmp(char*, char*);
@@ -55,6 +56,14 @@ char* strcpy(char *s, char *t){
 int strcmp(char *s, char *t){
   
   return strncmp(s, t, strlen(t));
+}
+
+void printVarTable(){
+
+  int i;
+  for(i=0; i < MAX_VARIABLES; i++){
+    printAssignment(var_table[i]);
+  }
 }
 
 int availableAssign(int index){
@@ -211,7 +220,7 @@ int isVarTableEmpty(){
 // Append a new allocated assignLink to var_table
 int addVar(char* variable, char* value){
 
-  cprintf("Inside addVar\n");
+  // cprintf("Inside addVar\n");
 
 
   if(isVarTableFull())
@@ -239,14 +248,15 @@ int addVar(char* variable, char* value){
 int removeVar(char* variable){
 
 	if(isVarTableEmpty())
-		return 0;
+		return -1;
 
 	int i=0;
 	while(i < MAX_VARIABLES){
 
-		if(strncmp(var_table[i]->var, variable, strlen(variable)) == 0){
+		if(strcmp(var_table[i]->var, variable) == 0){
 
       clearAssignment(i);
+      var_table_size--;
 			// var_table[i] = NULL;
 			return 0;
 		}
@@ -255,7 +265,7 @@ int removeVar(char* variable){
 	}
 
 	// No variable with the given name
-	return 0;
+	return -1;
 }
 
 
@@ -1053,9 +1063,7 @@ setVariable(char* variable, char* value){
 			resetBuf(var_table[i]->value);
 			strncpy(var_table[i]->value, value, strlen(value));
 
-      cprintf("Right before returning from setVariable. var_table[i]->value: ");
-      cprintf(var_table[i]->value);
-      cprintf("\n");
+      // cprintf("Right before returning from setVariable. var_table[i]->value: %s\n", var_table[i]->value);
 
 			return 0;
 		}
@@ -1073,7 +1081,7 @@ setVariable(char* variable, char* value){
 int
 getVariable(char* variable, char* value){
 
-  cprintf("Inside getVariable. variable: %s, value: %s\n", variable, value);
+  // cprintf("Inside getVariable. variable: %s, value: %s\n", variable, value);
   
 	int i=0;
 	while(i < MAX_VARIABLES){
@@ -1081,13 +1089,14 @@ getVariable(char* variable, char* value){
 
     if(strcmp(var_table[i]->var, variable) == 0){
       
-      cprintf("Right before returning from getVariable. value: %s\n", value);
+      // cprintf("Right before returning from getVariable. value: %s\n", value);
 
-      printAssignment(var_table[i]);
+      // printAssignment(var_table[i]);
       strcpy(value, var_table[i]->value);
 
-      cprintf("Right before returning from getVariable. value: %s\n", value);
-
+      // cprintf("Right before returning from getVariable. value: %s\n", value);
+      printVarTable();
+      cprintf("var_table size: %d\n", var_table_size);
       return 0;
 		}
 
