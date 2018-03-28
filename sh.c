@@ -291,89 +291,6 @@ main(void)
     //Add command to history array
     history_append(buf); // chops '\n' of buf in side
 
-    //TEST REMOVE ME
-    setVariable("x", "bla");
-    // char val[MAX_CMD_SIZE];
-    // getVariable("x", val);
-    // printf(1, "result: x= %s\n", val);
-
-    // // ASSIGNMENTS
-    // //getVarilable
-    // char cmd[strlen(buf)];
-    // strcpy(cmd, buf);
-    // int index = 0;
-    // int len = 0;
-    // char newCmd[MAX_CMD_SIZE];
-
-    // printf(1, "cmd before get: %s\n", cmd);
-
-    // while(index >= 0){
-
-    //   getFirstDollarVar(cmd+index+len, &index, &len);
-
-    //   printf(1, "index after get: %d\n", index);
-    //   printf(1, "len after get: %d\n", len);
-
-    //   if(index >= 0){
-
-
-    //     char var[len];
-    //     char value[MAX_CMD_SIZE];
-    //     strncpy(var, buf+index, len);
-        
-    //     if(var[strlen(var)-1] == ' '){
-
-    //       append_str(newCmd, " ");
-    //       var[strlen(var)-1] = 0;
-    //     }
-
-    //     printf(1, "var+1: %s\n", var+1);
-        
-    //     int ret = getVariable(var+1, value);
-
-    //     printf(1, "ret: %d\n", ret);
-    //     printf(1, "value: %s\n", value);
-
-    //     append_str(newCmd, value);
-    //   }
-    //   else{
-    //     append_str(newCmd, cmd); 
-    //   }
-
-    //   printf(1, "newCmd after get: %s\n", newCmd);
-    // }
-
-    // // setVariable
-
-    // printf(1, "newCmd before set: %s\n", newCmd);
-    // index = getIndexOfChar('=', newCmd);
-    // printf(1, "index before set: %d\n", index);
-    // if(index > 0){
-    //   char var[index];
-    //   char value[strlen(newCmd)-index];
-    //   strncpy(var, newCmd, index);
-    //   var[index] = 0;
-    //   strcpy(value, newCmd+index+1);
-    //   int ret = setVariable(var, value);
-
-    //   printf(1, "setVariable:\n");
-    //   printf(1, "  ret: %d\n", ret);
-    //   printf(1, "  var: %s\n", var);
-    //   printf(1, "  value: %s\n", value);
-
-
-    //   resetStr(buf);
-    //   strcpy(buf, newCmd);
-    //   resetStr(newCmd);
-    //   continue;
-    // }
-
-    // resetStr(buf);
-    // strcpy(buf, newCmd);
-    // resetStr(newCmd);
-
-
-
     if(buf[0] == 'c' && buf[1] == 'd' && buf[2] == ' '){
       // Chdir must be called by the parent, not the child.
       buf[strlen(buf)-1] = 0;  // chop \n
@@ -411,10 +328,6 @@ main(void)
 
       continue; 
     }
-
-    
-
-
 
 
 
