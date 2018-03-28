@@ -293,6 +293,7 @@ main(void)
 
     //TESTS. REMOVE ME
     char retVal[MAX_CMD_SIZE];
+    char retVal2[MAX_CMD_SIZE];
     char* var = "x";
     char* value = "alon";
     char* var2 = "y";
@@ -304,7 +305,22 @@ main(void)
         printf(1, "Set %s to %s properly\n", var2, value2);
 
       if(getVariable(var, retVal) == 0)
-        printf(1, "returned x=%s\n", retVal);
+        printf(1, "returned %s=%s\n", var, retVal);
+
+      if(getVariable(var2, retVal2) == 0)
+        printf(1, "returned %s=%s\n", var2, retVal2);
+
+      if(setVariable(var, value2) == 0)
+        printf(1, "Set %s to %s properly\n", var, value2);
+
+      if(getVariable(var, retVal2) == 0)
+        printf(1, "returned %s=%s\n", var, retVal2);
+
+      if(getVariable("bla", retVal2) == 0)
+        printf(1, "returned %s=%s\n", "bla", retVal2);
+
+      if(remVariable(var) == 0)
+        printf(1, "returned %s=%s\n", var, retVal2);
     }
 
     if(buf[0] == 'c' && buf[1] == 'd' && buf[2] == ' '){
