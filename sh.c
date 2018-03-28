@@ -291,6 +291,22 @@ main(void)
     //Add command to history array
     history_append(buf); // chops '\n' of buf in side
 
+    //TESTS. REMOVE ME
+    char retVal[MAX_CMD_SIZE];
+    char* var = "x";
+    char* value = "alon";
+    char* var2 = "y";
+    char* value2 = "123";
+    if(setVariable(var, value) == 0){
+        printf(1, "Set %s to %s properly\n", var, value);
+      
+      if(setVariable(var2, value2) == 0)
+        printf(1, "Set %s to %s properly\n", var2, value2);
+
+      if(getVariable(var, retVal) == 0)
+        printf(1, "returned x=%s\n", retVal);
+    }
+
     if(buf[0] == 'c' && buf[1] == 'd' && buf[2] == ' '){
       // Chdir must be called by the parent, not the child.
       buf[strlen(buf)-1] = 0;  // chop \n
