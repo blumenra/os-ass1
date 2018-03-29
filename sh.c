@@ -89,6 +89,7 @@ int handleSetVariable(char* buf){
               break;
           case -1 :
               printf(1, "No room for additional variables\n");
+              set = 1;
               break;
           case -2 :
               printf(1, "Input is illegal\n");
@@ -359,8 +360,7 @@ main(void)
     if(handleSetVariable(buf)) // Look for '='s
       continue;
 
-
-
+    
     if(buf[0] == 'c' && buf[1] == 'd' && buf[2] == ' '){
       // Chdir must be called by the parent, not the child.
       buf[strlen(buf)-1] = 0;  // chop \n
