@@ -62,11 +62,62 @@ void printHistory(void);
 void initCmdArray(char*);
 char* getHistoryCMD(int, char*);
 
-void getFirstDollarVar(char*, int*, int*);
 void append_str(char*, char*);
 int getIndexOfChar(char, char*);
 void resetStr(char*);
 void resetnStr(char*, int);
+int handleGetVariable(char*);
+
+
+int handleGetVariable(char* buf){
+
+    char newBuf[MAX_CMD_SIZE];
+    int dollarFound = 0;
+    int i_newBuf = 0;
+
+    
+    for (int i = 0; i < strlen(buf) ; i++){
+    
+        if (buf[i] == '$'){ //if found a dollar, replace the var with its value and put in newBuf
+            
+            i++;
+            int i_var = 0;
+            char var_name[MAX_CMD_SIZE];
+            char value[MAX_CMD_SIZE];
+            resetnStr(value, MAX_CMD_SIZE);
+
+            //copy only the variable name
+            while ((buf[i]  != '\0') && 
+                    (buf[i] != ' ') &&
+                    (buf[i] != '\n') &&
+                    (buf[i] != '$')){
+                var_name[i_var] = buf[i];
+                i_var++;
+                i++;
+            }
+            
+            i--;
+            var_name[i_var] = '\0';
+            if (getVariable(var_name, value) == -1){
+                printf(2, "variable %s not in the table\n", var_name);
+                continue;
+            }
+            int i_value = 0;
+            while (value[i_value] != '\0' && value[i_value] != '\n'){
+                newBuf[i_newBuf++] = value[i_value++];
+            }
+            
+            dollarFound = 1;
+        }
+        else //if not a dollar - copy as it is from buf to newBuf
+          newBuf[i_newBuf++] = buf[i];
+    }
+
+    newBuf[i_newBuf] = '\0';
+    strcpy(buf, newBuf);
+    
+    return dollarFound;
+}
 
 void resetnStr(char* str, int n){
 
@@ -81,11 +132,9 @@ void resetStr(char* buf){
 
 int getIndexOfChar(char c, char* str){
 
-  //printf(1, "strlen: %d\n", strlen(str));  
   int i;
   for(i=0; i < strlen(str); i++){
-    //printf(1, "c: %c\n", c);
-    //printf(1, "str[%d]: %c\n", i, str[i]);
+
     if(c == str[i])
       return i;
   }
@@ -97,31 +146,6 @@ void append_str(char* buf, char* str){
   strncpy(buf+strlen(buf), str, strlen(str));
 }
 
-void getFirstDollarVar(char* buf, int* index, int* len){
-
-  *index = getIndexOfChar('$', buf);
-  if(*index < 0){
-    *len = -1;
-    return;
-  }
-
-  int end1 = getIndexOfChar('$', buf+*index+1);
-  int end2 = getIndexOfChar(' ', buf+*index+1);
-  if(end1 <= 0){
-    if(end2 <= 0)
-      *len = strlen(buf+*index); // len is the last $var len including the '$'
-    else
-      *len = end2-*index+1; // include ' '
-  }
-  else
-    if(end2 <= 0)
-      *len = end1-*index;
-    else
-      if(end1 < end2)
-        *len = end1-*index;
-      else
-        *len = end2-*index;
-}
 
 void initCmdArray(char* array){
 
@@ -268,22 +292,6 @@ getcmd(char *buf, int nbuf)
   return 0;
 }
 
-    /*TESTS. REMOVE ME
-    char retVal[MAX_CMD_SIZE];
-    char* var = "x";
-    char* value = "alon";
-    char* var2 = "y";
-    char* value2 = "123";
-    if(setVariable(var, value) == 0){
-        printf(1, "Set %s to %s properly\n", var, value);
-      
-      if(setVariable(var2, value2) == 0)
-        printf(1, "Set %s to %s properly\n", var2, value2);
-
-      if(getVariable(var, retVal) == 0)
-        printf(1, "returned x=%s\n", retVal);
-    }*/
-
     
 int
 main(void)
@@ -312,49 +320,18 @@ main(void)
       continue;
 
 
-    //START getVariable:
-    char newBuf[MAX_CMD_SIZE];
-    int i_newBuf = 0;
-    for (int i = 0; i<strlen(buf) ; i++){
-    
-        if (buf[i] == '$'){ //if found a dollar, replace the var with its value and put in newBuf
-            i++;
-            int i_var = 0;
-            char var_name[MAX_CMD_SIZE];
-            char value[MAX_CMD_SIZE];
-            resetnStr(value, MAX_CMD_SIZE);
-            
-            //copy only the variable name
-            while ((buf[i]  != '\0') && 
-                    (buf[i] != ' ') &&
-                    (buf[i] != '\n') &&
-                    (buf[i] != '$')){
-                var_name[i_var] = buf[i];
-                i_var++;
-                i++;
-            }
-            
-            i--;
-            var_name[i_var] = '\0';
-            if (getVariable(var_name, value) == -1){
-                printf(2, "variable %s not in the table\n", var_name);
-                continue;
-            }
-            int i_value = 0;
-            while (value[i_value] != '\0' && value[i_value] != '\n'){
-                newBuf[i_newBuf++] = value[i_value++];
-            }
-        }
-        else //if not a dollar - copy as it is from buf to newBuf
-          newBuf[i_newBuf++] = buf[i];
+    //STRAT getVariable
+    // char newBuf[MAX_CMD_SIZE];
+
+    while(handleGetVariable(buf)){
+      ;
     }
+    // int ret = handleGetVariable(buf, newBuf);
+    // printf(1, "getVariable ret: %d\n", ret);
+    //STRAT getVariale
 
-    newBuf[i_newBuf] = '\0';
-    strcpy(buf, newBuf);
-    //END setVariable
 
-
-    //sSTART etVariable:
+    //START setVariable:
     int index = getIndexOfChar('=', buf);
     char var[MAX_CMD_SIZE];
     
