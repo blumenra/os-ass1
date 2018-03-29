@@ -220,9 +220,6 @@ int isVarTableEmpty(){
 // Append a new allocated assignLink to var_table
 int addVar(char* variable, char* value){
 
-  // cprintf("Inside addVar\n");
-
-
   if(isVarTableFull())
     return -1;
 
@@ -547,8 +544,6 @@ exit(void)
   curproc->state = ZOMBIE;
   sched();
 
-  printProcData(myproc());
-
   panic("zombie exit");
 }
 
@@ -682,16 +677,11 @@ scheduler(void)
     
     struct proc *p;
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-      // printProcData(p); //REMOVE ME
-      // cprintf("BLAAAAAAAAAAAA\n");
+
       // find the first runnable in ptable
       if(p->state != RUNNABLE)
         continue;
 
-
-      // cprintf("************************");
-      // printProcData(p); //REMOVE ME
-      // printProcData(p); //REMOVE ME
 
       // Switch to chosen process.  It is the process's job
       // to release ptable.lock and then reacquire it
@@ -722,15 +712,9 @@ scheduler(void)
       if(p->state == RUNNABLE){
         if(minProc != NULL){
 
-          // cprintf(">>>>>>>>>>>>>>>>");
-          // printProcData(p); //REMOVE ME
-          // printProcData(minProc); //REMOVE ME
-          // cprintf("<<<<<<<<<<<<<<<<");
-
           if(p->ctime < minProc->ctime){
 
             minProc = p;
-            // continue;
           }
         }
         else{
@@ -741,7 +725,6 @@ scheduler(void)
 
     if(minProc != NULL){
 
-      // printProcData(minProc); //REMOVE ME
       p = minProc;
 
       // Switch to chosen process.  It is the process's job
@@ -773,23 +756,17 @@ scheduler(void)
       if(p->state == RUNNABLE){
         if(srtProc != NULL){
 
-          // cprintf(">>>>>>>>>>>>>>>>");
-          // printProcData(p); //REMOVE ME
-          // printProcData(srtProc); //REMOVE ME
-          // cprintf("<<<<<<<<<<<<<<<<");
-
           if(p->remApproxTime < srtProc->remApproxTime){
 
             srtProc = p;
-            continue;
           }
         }
         else{
           srtProc = p;
         }
       }
-
     }
+    
     if(srtProc != NULL){
       
       p = srtProc;
@@ -1063,8 +1040,6 @@ setVariable(char* variable, char* value){
 			resetBuf(var_table[i]->value);
 			strncpy(var_table[i]->value, value, strlen(value));
 
-      // cprintf("Right before returning from setVariable. var_table[i]->value: %s\n", var_table[i]->value);
-
 			return 0;
 		}
 
@@ -1081,22 +1056,13 @@ setVariable(char* variable, char* value){
 int
 getVariable(char* variable, char* value){
 
-  // cprintf("Inside getVariable. variable: %s, value: %s\n", variable, value);
-  
 	int i=0;
 	while(i < MAX_VARIABLES){
 
 
     if(strcmp(var_table[i]->var, variable) == 0){
       
-      // cprintf("Right before returning from getVariable. value: %s\n", value);
-
-      // printAssignment(var_table[i]);
       strcpy(value, var_table[i]->value);
-
-      // cprintf("Right before returning from getVariable. value: %s\n", value);
-      printVarTable();
-      cprintf("var_table size: %d\n", var_table_size);
       return 0;
 		}
 
@@ -1156,17 +1122,9 @@ void updateProcsData(){
 int updateApproxTime(struct proc *p){
 
 
-  // acquire(&ptable.lock);
-
-  // cprintf("%d\n", myproc()->pid);
-  // cprintf("BLAAAAA\n");
-  // release(&ptable.lock);
-  // printProcData(p);
-
   if(p->rtime >= p->remApproxTime){
 
     p->remApproxTime = p->remApproxTime + ALPHA*p->remApproxTime;    
-
     return 1;
   }
   
