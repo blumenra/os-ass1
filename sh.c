@@ -57,7 +57,7 @@ struct backcmd {
 int indexOfNext = 0;
 char historyArr[MAX_HISTORY][MAX_CMD_SIZE];
 
-void history_append(char*);
+int history_append(char*);
 void printHistory(void);
 void initCmdArray(char*);
 char* getHistoryCMD(int, char*);
@@ -66,14 +66,17 @@ void getFirstDollarVar(char*, int*, int*);
 void append_str(char*, char*);
 int getIndexOfChar(char, char*);
 void resetStr(char*);
+void resetnStr(char*, int);
+
+void resetnStr(char* str, int n){
+
+  for(int i=0; i < n; i++)
+    str[i] = '\0';
+}
 
 void resetStr(char* buf){
 
-  int i;
-  for(i=0; i < strlen(buf); i++){
-    
-    buf[i] = 0;
-  }
+  resetnStr(buf, strlen(buf));
 }
 
 int getIndexOfChar(char c, char* str){
@@ -130,10 +133,10 @@ void initCmdArray(char* array){
   }
 }
 
-void history_append(char* cmd){
+int history_append(char* cmd){
 
   if(cmd[0] == '\n')
-    return;
+    return 0;
 
   cmd[strlen(cmd)-1] = 0;  // chop \n
     
@@ -141,6 +144,8 @@ void history_append(char* cmd){
 
   indexOfNext++;
   indexOfNext = indexOfNext % MAX_HISTORY;
+
+  return 1;
 
 }
 
@@ -303,111 +308,80 @@ main(void)
   while(getcmd(buf, sizeof(buf)) >= 0){
     
     //Add command to history array
-    history_append(buf); // chops '\n' of buf in side
+    if(!history_append(buf)) // chops '\n' of buf in side
+      continue;
 
-    // //TESTS. REMOVE ME
-    // char retVal[MAX_CMD_SIZE];
-    // char retVal2[MAX_CMD_SIZE];
-    // char* var = "x";
-    // char* value = "alon";
-    // char* var2 = "y";
-    // char* value2 = "123";
-    // if(setVariable(var, value) == 0){
-    //     printf(1, "Set %s to %s properly\n", var, value);
-      
-    //   if(setVariable(var2, value2) == 0)
-    //     printf(1, "Set %s to %s properly\n", var2, value2);
 
-    //   if(getVariable(var, retVal) == 0)
-    //     printf(1, "returned %s=%s\n", var, retVal);
-
-    //   if(getVariable(var2, retVal2) == 0)
-    //     printf(1, "returned %s=%s\n", var2, retVal2);
-
-    //   if(setVariable(var, value2) == 0)
-    //     printf(1, "Set %s to %s properly\n", var, value2);
-
-    //   if(getVariable(var, retVal2) == 0)
-    //     printf(1, "returned %s=%s\n", var, retVal2);
-
-    //   if(getVariable("bla", retVal2) == 0)
-    //     printf(1, "returned %s=%s\n", "bla", retVal2);
-
-    //   if(remVariable(var) == 0)
-    //     printf(1, "returned %s=%s\n", var, retVal2);
-
-    //looking for assignmemt in buf
-    int index = getIndexOfChar('=', buf);
-    char var[MAX_CMD_SIZE];
-    if (index > 0){
-        strncpy(var, buf, index-1);
-        char value[MAX_CMD_SIZE];
-        strcpy(value, buf+strlen(buf)-(strlen(buf)-index-1));
-        int ans = setVariable(var ,value);
-        printf(1, "var %s + val %s\n", var, value);
-        switch(ans){
-            case 0 :
-                printf(1, "Variable set correctly\n");
-            case -1 :
-                printf(1, "No room for additional variables\n");
-            case -2 :
-                printf(1, "Input is illegal\n");
-        }
-    }
-    
-    //*********************************************** $$$$$$$$$$$$$$$$$$$$ ///
-    //maximum possible buf size = 100
-    char bufProxy[MAX_CMD_SIZE];
-    int i_proxy = 0;
+    //START getVariable:
+    char newBuf[MAX_CMD_SIZE];
+    int i_newBuf = 0;
     for (int i = 0; i<strlen(buf) ; i++){
-        if (buf[i] == '$'){
+    
+        if (buf[i] == '$'){ //if found a dollar, replace the var with its value and put in newBuf
             i++;
-            char var_name[100];
-            char value[100];
-            int i_tmp = 0;
+            int i_var = 0;
+            char var_name[MAX_CMD_SIZE];
+            char value[MAX_CMD_SIZE];
+            resetnStr(value, MAX_CMD_SIZE);
+            
             //copy only the variable name
-            while (buf[i] != ' ' && buf[i] != '\0' && buf[i]!= '\n' && buf[i] != '$'){
-                var_name[i_tmp] = buf[i];
-                i_tmp++;
+            while ((buf[i]  != '\0') && 
+                    (buf[i] != ' ') &&
+                    (buf[i] != '\n') &&
+                    (buf[i] != '$')){
+                var_name[i_var] = buf[i];
+                i_var++;
                 i++;
             }
+            
             i--;
-            var_name[i_tmp] = '\0';
+            var_name[i_var] = '\0';
             if (getVariable(var_name, value) == -1){
                 printf(2, "variable %s not in the table\n", var_name);
                 continue;
             }
             int i_value = 0;
             while (value[i_value] != '\0' && value[i_value] != '\n'){
-                bufProxy[i_proxy++] = value[i_value++];
-            }
-            
-        //else bufProxy[i_proxy++] = buf[i];
-            
-            char final[100];
-            final[0]=0;
-            int j = 0;
-            while (j < i){
-                final[j] = buf[j];
-                j++;
-            }
-            
-            int k = 0;
-            while (bufProxy[k] != '\0' && bufProxy[k] != '\n'){
-                final[j] = bufProxy[k];
-                k++;
+                newBuf[i_newBuf++] = value[i_value++];
             }
         }
+        else //if not a dollar - copy as it is from buf to newBuf
+          newBuf[i_newBuf++] = buf[i];
     }
+
+    newBuf[i_newBuf] = '\0';
+    strcpy(buf, newBuf);
+    //END setVariable
+
+
+    //sSTART etVariable:
+    int index = getIndexOfChar('=', buf);
+    char var[MAX_CMD_SIZE];
     
-    
-    
-    
-    
-    // $$$$$$$$$$$$$$$$$$$$$$$$$$ 
-    
-    //searches for = $ sends to syscalls
-    //*/
+    //looking for assignmemt in buf
+    if (index > 0){
+        strncpy(var, buf, index-1);
+        char value[MAX_CMD_SIZE];
+        strcpy(value, buf+strlen(buf)-(strlen(buf)-index-1));
+        int ans = setVariable(var ,value);
+        // printf(1, "var %s + val %s\n", var, value);
+        switch(ans){
+            case 0 :
+                // printf(1, "Variable %s set correctly to %s\n", var, value);
+                continue;
+            case -1 :
+                printf(1, "No room for additional variables\n");
+                break;
+            case -2 :
+                printf(1, "Input is illegal\n");
+                break;
+            default:
+                ;
+        }
+    }
+    //END getVariable
+
+
 
     if(buf[0] == 'c' && buf[1] == 'd' && buf[2] == ' '){
       // Chdir must be called by the parent, not the child.
