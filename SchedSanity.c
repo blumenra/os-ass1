@@ -85,10 +85,10 @@ main(int argc, char *argv[]){
   int num_of_procs = 10;
 
 
-  // sanityTest(1, num_of_procs, 10000000);         // simple calculation within a medium sized loop1
-  // sanityTest(2, num_of_procs, 1000000000);   // simple calculation within a very large loop
-  sanityTest(3, num_of_procs, 1000);      // printing to screen within a medium sized loop
-  sanityTest(4, num_of_procs, 10000); // printing to screen within a very large loop
+  sanityTest(1, num_of_procs, 10000000);     // simple calculation with a medium sized loop1
+  sanityTest(2, num_of_procs, 1000000000);   // simple calculation with a very large loop
+  sanityTest(3, num_of_procs, 1000);         // I/O operation with a medium sized loop
+  sanityTest(4, num_of_procs, 10000);        // I/O operation with a very large loop
 
   exit();
 }
