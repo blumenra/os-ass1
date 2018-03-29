@@ -245,7 +245,7 @@ int addVar(char* variable, char* value){
 int removeVar(char* variable){
 
 	if(isVarTableEmpty())
-		return -1;
+		return 0;
 
 	int i=0;
 	while(i < MAX_VARIABLES){
@@ -255,14 +255,14 @@ int removeVar(char* variable){
       clearAssignment(i);
       var_table_size--;
 			// var_table[i] = NULL;
-			return 0;
+			return 1;
 		}
 
 		i++;
 	}
 
 	// No variable with the given name
-	return -1;
+	return 0;
 }
 
 
