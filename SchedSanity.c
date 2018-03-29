@@ -3,26 +3,13 @@
 #include "user.h"
 #include "fs.h"
 
-#define CALC 1
-#define IO 2
 
 void printAverages(int, int, int, int, int);
 int IOfunc(void);
 int simpleCalc(void);
-void sanityTest(int type, int num_of_procs, int loop_size, int (*func)());
+void sanityTest(int type, int num_of_procs, int loop_size);
 
-int IOfunc(){
-
-  sleep(1);
-  return 0;
-}
-
-int simpleCalc(){
-
-  return 1+2*9;
-}
-
-void sanityTest(int type, int num_of_procs, int loop_size, int (*func)()){
+void sanityTest(int type, int num_of_procs, int loop_size){
     
   printf(1, "Starting sanityTest..\n");
 
@@ -51,8 +38,11 @@ void sanityTest(int type, int num_of_procs, int loop_size, int (*func)()){
 
         if((type == 1) || (type == 2))
           calcAcc++;
-        else
-          sleep(1);
+        else{
+
+          int fd = open("ls", 0);
+          close(fd);
+        }
       }
 
       exit(); // kill child
@@ -94,10 +84,11 @@ main(int argc, char *argv[]){
   
   int num_of_procs = 10;
 
-  sanityTest(1, num_of_procs, 10000000, simpleCalc);         // simple calculation within a medium sized loop1
-  sanityTest(2, num_of_procs, 1000000000, simpleCalc);   // simple calculation within a very large loop
-  sanityTest(3, num_of_procs, 1000, IOfunc);      // printing to screen within a medium sized loop
-  sanityTest(4, num_of_procs, 10000, IOfunc); // printing to screen within a very large loop
+
+  // sanityTest(1, num_of_procs, 10000000);         // simple calculation within a medium sized loop1
+  // sanityTest(2, num_of_procs, 1000000000);   // simple calculation within a very large loop
+  sanityTest(3, num_of_procs, 1000);      // printing to screen within a medium sized loop
+  sanityTest(4, num_of_procs, 10000); // printing to screen within a very large loop
 
   exit();
 }
