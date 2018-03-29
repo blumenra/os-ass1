@@ -67,7 +67,39 @@ int getIndexOfChar(char, char*);
 void resetStr(char*);
 void resetnStr(char*, int);
 int handleGetVariable(char*);
+int handleSetVariable(char*);
 
+int handleSetVariable(char* buf){
+
+  int set = 0; // if set was done then 1, else 0
+
+  int index = getIndexOfChar('=', buf);
+  char var[MAX_CMD_SIZE];
+  
+  //looking for assignmemt in buf
+  if (index > 0){
+      strncpy(var, buf, index-1);
+      char value[MAX_CMD_SIZE];
+      strcpy(value, buf+strlen(buf)-(strlen(buf)-index-1));
+      int ans = setVariable(var ,value);
+      
+      switch(ans){
+          case 0 : // set was done
+              set = 1;
+              break;
+          case -1 :
+              printf(1, "No room for additional variables\n");
+              break;
+          case -2 :
+              printf(1, "Input is illegal\n");
+              break;
+          default:
+              ;
+      }
+  }
+
+  return set;
+}
 
 int handleGetVariable(char* buf){
 
@@ -180,14 +212,14 @@ void printHistory(){
   if(historyArr[indexOfNext][0] == NULL){
 
     for(i=0; i < indexOfNext; i++){
-      printf(1, "    %d:  %s\n", i+1, historyArr[i]);
+      printf(1, "%d. %s\n", i+1, historyArr[i]);
     }
   }
    else{
      int j;
      i = indexOfNext;
      for(j=0; j < MAX_HISTORY; j++){
-       printf(1, "    %d:  %s\n", j+1, historyArr[i]);
+       printf(1, "%d. %s\n", j+1, historyArr[i]);
        i++;
        i = i % MAX_HISTORY;
      } 
@@ -320,43 +352,12 @@ main(void)
       continue;
 
 
-    //STRAT getVariable
-    // char newBuf[MAX_CMD_SIZE];
+    // getVariable
+    handleGetVariable(buf); // Look for '$'s
 
-    while(handleGetVariable(buf)){
-      ;
-    }
-    // int ret = handleGetVariable(buf, newBuf);
-    // printf(1, "getVariable ret: %d\n", ret);
-    //STRAT getVariale
-
-
-    //START setVariable:
-    int index = getIndexOfChar('=', buf);
-    char var[MAX_CMD_SIZE];
-    
-    //looking for assignmemt in buf
-    if (index > 0){
-        strncpy(var, buf, index-1);
-        char value[MAX_CMD_SIZE];
-        strcpy(value, buf+strlen(buf)-(strlen(buf)-index-1));
-        int ans = setVariable(var ,value);
-        // printf(1, "var %s + val %s\n", var, value);
-        switch(ans){
-            case 0 :
-                // printf(1, "Variable %s set correctly to %s\n", var, value);
-                continue;
-            case -1 :
-                printf(1, "No room for additional variables\n");
-                break;
-            case -2 :
-                printf(1, "Input is illegal\n");
-                break;
-            default:
-                ;
-        }
-    }
-    //END getVariable
+    // setVariable
+    if(handleSetVariable(buf)) // Look for '='s
+      continue;
 
 
 
@@ -369,7 +370,7 @@ main(void)
     }
 
     //HISTORY
-    if(strcmp(buf, "history") == 0){
+    if(strcmp(buf, "history") == 0){ //history
       printHistory();
       continue;
     }
@@ -390,15 +391,14 @@ main(void)
         printHistory();
 	      continue;
       }
-      
-      if(fork1() == 0)
-        runcmd(parsecmd(cmd));
-      wait();
 
-      continue; 
+      
+      resetStr(buf);
+      strcpy(buf, cmd);
     }
 
-
+    // handle variables return from commands between the first getVariable to here (history for instance)
+    handleGetVariable(buf);
 
     if(fork1() == 0)
       runcmd(parsecmd(buf));
